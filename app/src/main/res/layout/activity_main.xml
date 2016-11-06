@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -8,10 +9,44 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.dsd2016.iparked_android.Activities.MainActivity">
+    tools:context="com.dsd2016.iparked_android.Activities.MainActivity"
+    android:background="@color/colorPrimaryDark">
 
-    <TextView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        app:srcCompat="@drawable/captureimage_inline"
+        android:id="@+id/imageView3"
+        android:layout_marginBottom="55dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:layout_height="50dp"
+        app:srcCompat="@drawable/map"
+        android:layout_marginStart="59dp"
+        android:id="@+id/imageButton2"
+        android:layout_width="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:srcCompat="@drawable/settings"
+        android:layout_alignTop="@+id/imageButton2"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="64dp"
+        android:id="@+id/imgbtn_setting" />
+
+    <TextView
+        android:text="Last Recorded Location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/imageView3"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/textView3"
+        android:textSize="24sp"
+        android:textColor="@color/common_google_signin_btn_text_dark_default" />
+
 </RelativeLayout>

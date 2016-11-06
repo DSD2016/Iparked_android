@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">iParked</string>
+    <string name="splash_loading_text">Pairing with iBeacon</string>
+    <string name="setting_placeholder1">iBeacon not paired</string>
 </resources>
