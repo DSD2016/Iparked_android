@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@color/tumblr_blue"/>
+                    <size
+                        android:width="80dp"
+                        android:height="80dp"/>
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#4D000000"/>
+                    <size
+                        android:width="80dp"
+                        android:height="80dp"/>
+                </shape>
+            </item>
+
+        </layer-list>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/tumblr_blue"/>
+            <size
+                android:width="80dp"
+                android:height="80dp"/>
+        </shape>
+    </item>
+
+</selector>

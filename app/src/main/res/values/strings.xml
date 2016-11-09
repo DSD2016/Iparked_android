@@ -2,4 +2,16 @@
     <string name="app_name">iParked</string>
     <string name="splash_loading_text">Pairing with iBeacon</string>
     <string name="setting_placeholder1">iBeacon not paired</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_first_section">First Section</string>
+    <string name="title_checkbox_preference">Checkbox</string>
+    <string name="default_checkbox_preference">yes</string>
+    <string name="title_edittext_preference">EditText Preference</string>
+    <string name="summary_edittext_preference">Simple Summary</string>
+    <string name="dialog_title_edittext_preference">Write Here</string>
+    <string name="title_second_section">Second Section</string>
+    <string name="title_list_preference">List Preference</string>
+    <string name="dialog_title_list_preference">List Title</string>
 </resources>
