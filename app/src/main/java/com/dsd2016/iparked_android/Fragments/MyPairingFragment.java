@@ -124,7 +124,7 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         if(requestCode == 1)
         {
-            Log.d("bah", "coarse location permission granted");
+            Log.d("Message", "coarse location permission granted");
         }
     }
 
