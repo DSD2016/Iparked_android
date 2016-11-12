@@ -5,11 +5,24 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -46,6 +59,13 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
     TextView distanceTxt;
     Boolean connect=false;
     OnMenuItemSelectedListener mListener;
+    BluetoothAdapter mBluetoothAdapter;
+    private int REQUEST_ENABLE_BT = 1;
+    private static final long SCAN_PERIOD = 10000;
+    private List<ScanFilter> filters;
+    private BluetoothLeScanner mLEScanner;
+    private ScanSettings settings;
+    private Handler mHandler;
 
     @Override
     public void onAttach(Context context) {
@@ -67,22 +87,140 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myView=inflater.inflate(R.layout.fragment_pairing, container, false);
-        menuLayout = (ClipRevealFrame) myView.findViewById(R.id.menu_layout);
         rootLayout = myView.findViewById(R.id.root_layout);
+
+        menuLayout = (ClipRevealFrame) myView.findViewById(R.id.menu_layout);
         arcLayout = (ArcLayout) myView.findViewById(R.id.arc_layout);
         centerItem = myView.findViewById(R.id.center_item);
         centerItem.setOnClickListener(this);
         for (int i = 0, size = arcLayout.getChildCount(); i < size; i++) {
             arcLayout.getChildAt(i).setOnClickListener(this);
         }
+        myView.findViewById(R.id.fab).setOnClickListener(this);
+
         connectBtn=(ImageButton)myView.findViewById(R.id.btn_connect);
         connectBtn.setOnClickListener(this);
         connectionImg=(ImageView)myView.findViewById(R.id.img_connection);
         distanceTxt=(TextView)myView.findViewById(R.id.txt_distance);
-        myView.findViewById(R.id.fab).setOnClickListener(this);
-        return myView;
 
+        mHandler = new Handler();
+        if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(getActivity(), "BLE Not Supported",
+                    Toast.LENGTH_SHORT).show();
+            getActivity().finish();
+        }
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        //Useless code API 23 and bigger bug
+        if (Build.VERSION.SDK_INT > 22) {
+            getActivity().requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        }
+
+        return myView;
     }
+
+    //Useless code API 23 and bigger bug
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        if(requestCode == 1)
+        {
+            Log.d("bah", "coarse location permission granted");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            if (Build.VERSION.SDK_INT > 20) {
+                mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+                settings = new ScanSettings.Builder()
+                        .setReportDelay(0)
+                        .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                        .build();
+                filters = new ArrayList<ScanFilter>();
+            }
+            scanLeDevice(true);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Bluetooth not enabled.
+                getActivity().finish();
+                return;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void scanLeDevice(final boolean enable) {
+        if (enable) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT < 21) {
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    } else {
+                        mLEScanner.stopScan(mScanCallback);
+                    }
+                }
+            }, SCAN_PERIOD);
+            if (Build.VERSION.SDK_INT < 21) {
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
+            } else {
+                mLEScanner.startScan(null, settings, mScanCallback);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT < 21) {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            } else {
+                mLEScanner.stopScan(mScanCallback);
+            }
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            Log.i("callbackType", String.valueOf(callbackType));
+            Log.i("result", result.toString());
+            BluetoothDevice btDevice = result.getDevice();
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for (ScanResult sr : results) {
+                Log.i("ScanResult - Results", sr.toString());
+            }
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            Log.e("Scan Failed", "Error Code: " + errorCode);
+        }
+    };
+
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.i("onLeScan", device.toString());
+                        }
+                    });
+                }
+            };
+
     public static MyPairingFragment newInstance() {
         return new MyPairingFragment();
     }
