@@ -14,16 +14,14 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.SparseArray;
-import android.widget.Toast;
 
+import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.widget.BaseAdapter;
+import android.widget.Toast;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by Mihovil and Hrvoje on 14.11.2016..
@@ -111,22 +109,22 @@ public class BeaconScanner {
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            //Log.i("bah", "result "+result.toString());
             ScanRecord record = result.getScanRecord();
             SparseArray<byte[]> data = record.getManufacturerSpecificData();
             int manKey = data.keyAt(0);
             int major = ((data.get(manKey)[18] << 8) | (data.get(manKey)[19] & 0xFF)) & 0xFFFF;
             int minor = ((data.get(manKey)[20] << 8) | (data.get(manKey)[21] & 0xFF)) & 0xFFFF;
-            int RSSI = result.getRssi();
-            String deviceName = record.getDeviceName();
-            String UUID = "";
+            int rssi = result.getRssi();
+            String name = record.getDeviceName();
+            String uuid;
             try{
-                UUID = record.getServiceUuids().toString();
+                uuid = record.getServiceUuids().toString();
             }
             catch (NullPointerException e){
-                UUID = "--";
+                uuid = "--";
             }
-            Log.i("bah", "Device name: "+deviceName+"  UUID: "+UUID+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
+            Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+rssi);
+            addToBeaconList(major, minor, rssi, name, uuid);
         }
 
         @Override
@@ -149,19 +147,30 @@ public class BeaconScanner {
                     int major = ((record[18] << 8) | (record[19] & 0xFF)) & 0xFFFF;
                     int minor = ((record[20] << 8) | (record[21] & 0xFF)) & 0xFFFF;
                     int RSSI = rssi;
-                    String deviceName = device.getName();
-                    String UUID = "";
+                    String name = device.getName();
+                    String uuid;
                     try{
                         StringBuilder buffer = new StringBuilder();
                         for(int i = 2; i < 18; i++) {
                             buffer.append(String.format("%02x", record[i]));
                         }
-                        UUID = buffer.toString();
+                        uuid = buffer.toString();
                     }
                     catch (NullPointerException e){
-                        UUID = "--";
+                        uuid = "--";
                     }
-                    Log.i("bah", "Device name: "+deviceName+"  UUID: "+UUID+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
+                    Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
+                    addToBeaconList(major, minor, rssi, name, uuid);
                 }
             };
+
+    private void addToBeaconList(int major, int minor, int rssi, String name, String uuid) {
+        for(Beacon b : beaconList) {
+            if(b.getMajor() == major && b.getMinor() == minor) {
+                beaconList.remove(b);
+                break;
+            }
+        }
+        beaconList.add(new Beacon(major, minor, rssi, name, uuid));
+    }
 }

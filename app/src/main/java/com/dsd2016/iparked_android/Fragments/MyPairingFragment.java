@@ -5,22 +5,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,12 +20,14 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.MyClasses.Beacon;
 import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
 import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
@@ -322,4 +315,73 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
         return reveal;
     }
 
+    // Adapter for holding devices found through scanning.
+    private class LeDeviceListAdapter extends BaseAdapter {
+        private ArrayList<Beacon> beaconList;
+        private LayoutInflater mInflator;
+
+        public LeDeviceListAdapter() {
+            super();
+            beaconList = new ArrayList<Beacon>();
+            mInflator = MyPairingFragment.this.getActivity().getLayoutInflater();
+        }
+
+        public void addDevice(Beacon beacon) {
+            for(Beacon b : beaconList) {
+                if(b.getMajor() == beacon.getMajor() && b.getMinor() == beacon.getMinor()) {
+                    beaconList.remove(b);
+                    break;
+                }
+            }
+            beaconList.add(beacon);
+        }
+
+        public Beacon getDevice(int position) {
+            return beaconList.get(position);
+        }
+
+        public void clear() {
+            beaconList.clear();
+        }
+
+        @Override
+        public int getCount() {
+            return beaconList.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return beaconList.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+//            ViewHolder viewHolder;
+//            // General ListView optimization code.
+//            if (view == null) {
+//                view = mInflator.inflate(R.layout.listitem_device, null);
+//                viewHolder = new ViewHolder();
+//                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
+//                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+//                view.setTag(viewHolder);
+//            } else {
+//                viewHolder = (ViewHolder) view.getTag();
+//            }
+//
+//            BluetoothDevice device = beaconList.get(i);
+//            final String deviceName = device.getName();
+//            if (deviceName != null && deviceName.length() > 0)
+//                viewHolder.deviceName.setText(deviceName);
+//            else
+//                viewHolder.deviceName.setText(R.string.unknown_device);
+//            viewHolder.deviceAddress.setText(device.getAddress());
+//
+            return view;
+        }
+    }
 }
