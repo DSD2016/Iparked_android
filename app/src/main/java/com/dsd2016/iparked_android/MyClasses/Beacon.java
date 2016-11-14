@@ -5,6 +5,7 @@ public class Beacon {
 
     private short major;
     private short minor;
+    private String name;
     private String uuid;
 
     public short getMajor() {
