@@ -17,9 +17,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import android.util.SparseArray;
-import android.view.LayoutInflater;
-import android.widget.BaseAdapter;
 import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +36,7 @@ public class BeaconScanner {
     private Handler mHandler;
     private boolean scanning;
     private List<Beacon> beaconList;
+    private BeaconListAdapter beaconListAdapter;
 
     public List<Beacon> getBeaconList() {
         return beaconList;
@@ -53,6 +53,10 @@ public class BeaconScanner {
         beaconList = new ArrayList<Beacon>();
     }
 
+    public void scanForBeacons(BeaconListAdapter beaconListAdapter){
+        this.beaconListAdapter = beaconListAdapter;
+        scanForBeacons();
+    }
     public void scanForBeacons (){
 
         if (Build.VERSION.SDK_INT > 20) {
@@ -123,8 +127,10 @@ public class BeaconScanner {
             catch (NullPointerException e){
                 uuid = "--";
             }
-            Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+rssi);
+            //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+rssi);
             addToBeaconList(major, minor, rssi, name, uuid);
+            beaconListAdapter.addBeacon(new Beacon(major, minor, rssi, name, uuid));
+            beaconListAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -159,8 +165,10 @@ public class BeaconScanner {
                     catch (NullPointerException e){
                         uuid = "--";
                     }
-                    Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
+                    //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
                     addToBeaconList(major, minor, rssi, name, uuid);
+                    beaconListAdapter.addBeacon(new Beacon(major, minor, rssi, name, uuid));
+                    beaconListAdapter.notifyDataSetChanged();
                 }
             };
 

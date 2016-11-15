@@ -6,13 +6,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.support.v4.app.ListFragment;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,27 +19,26 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.BaseAdapter;
+
 import android.widget.ImageButton;
-import android.widget.ImageView;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
 import com.dsd2016.iparked_android.MyClasses.Beacon;
+import com.dsd2016.iparked_android.MyClasses.BeaconListAdapter;
 import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
 import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
 import com.ogaclejapan.arclayout.ArcLayout;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class MyPairingFragment extends Fragment implements View.OnClickListener {
+public class MyPairingFragment extends ListFragment implements View.OnClickListener {
 
     private static final String TAG = "PAIRING_FRAGMENT";
     Toast toast = null;
@@ -48,10 +46,7 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
-    ImageButton connectBtn;
-    ImageView connectionImg;
-    TextView distanceTxt;
-    Boolean connect=false;
+    LayoutInflater mInflator;
     private BeaconScanner beaconScanner;
     private OnMenuItemSelectedListener mListener;
     private int REQUEST_ENABLE_BT = 1;
@@ -88,18 +83,13 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
         }
         myView.findViewById(R.id.fab).setOnClickListener(this);
 
-        connectBtn=(ImageButton)myView.findViewById(R.id.btn_connect);
-        connectBtn.setOnClickListener(this);
-        connectionImg=(ImageView)myView.findViewById(R.id.img_connection);
-        distanceTxt=(TextView)myView.findViewById(R.id.txt_distance);
-
         //Useless code API 23 and bigger bug
         if (Build.VERSION.SDK_INT > 22) {
             getActivity().requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         }
 
         beaconScanner = new BeaconScanner(getActivity());
-
+        Log.i("bah", "onCreate");
         return myView;
     }
 
@@ -114,13 +104,58 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
 
     @Override
     public void onResume() {
+        Log.i("bah", "SCAN");
         super.onResume();
+        Log.i("bah", "0");
         if (!beaconScanner.isBluetoothEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         } else {
-           beaconScanner.scanForBeacons();
+            Log.i("bah", "1");
+            mInflator = getActivity().getLayoutInflater();
+            Log.i("bah", "2");
+            BeaconListAdapter beaconListAdapter = new BeaconListAdapter(mInflator) {
+                @Override
+                public View getView(int i, View view, ViewGroup viewGroup) {
+                    ViewHolder viewHolder;
+                    // General ListView optimization code.
+                    if (view == null) {
+                        view = mInflator.inflate(R.layout.beacon_list_view, null);
+                        viewHolder = new ViewHolder();
+                        viewHolder.beaconName = (TextView) view.findViewById(R.id.beacon_name);
+                        viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
+                        viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
+                        viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
+                        view.setTag(viewHolder);
+                    } else {
+                        viewHolder = (ViewHolder) view.getTag();
+                    }
+
+                    Beacon beacon = beaconList.get(i);
+                    final String deviceName = beacon.getName();
+                    if (deviceName != null && deviceName.length() > 0) {
+                        viewHolder.beaconName.setText("Name: "+deviceName);
+                    }else {
+                        viewHolder.beaconName.setText("Name: unknown");
+                    }
+                    viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
+                    viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
+                    viewHolder.beaconDistance.setText("Distance: " + beacon.getRssi());
+                    return view;
+                }
+            };
+            Log.i("bah", "3");
+            setListAdapter(beaconListAdapter);
+            Log.i("bah", "SCAN");
+            beaconScanner.scanForBeacons(beaconListAdapter);
         }
+    }
+
+    static class ViewHolder {
+        TextView beaconName;
+        TextView beaconUuid;
+        TextView beaconNumbers;
+        TextView beaconDistance;
     }
 
     @Override
@@ -153,21 +188,6 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
             return;
         }
         if (v instanceof ImageButton) {
-            if(v.getTag().toString().equals("connect")){
-                if(!connect){
-                    connect=true;
-                    connectionImg.setImageResource(R.drawable.success);
-                    distanceTxt.setText("Distance 20 Cm");
-                    return;
-                }
-                else{
-                    connect=false;
-                    connectionImg.setImageResource(R.drawable.error);
-                    distanceTxt.setText("Distance N/A");
-                    return;
-                }
-            }
-
             switchfrag((ImageButton) v);
         }
     }
@@ -315,73 +335,4 @@ public class MyPairingFragment extends Fragment implements View.OnClickListener 
         return reveal;
     }
 
-    // Adapter for holding devices found through scanning.
-    private class LeDeviceListAdapter extends BaseAdapter {
-        private ArrayList<Beacon> beaconList;
-        private LayoutInflater mInflator;
-
-        public LeDeviceListAdapter() {
-            super();
-            beaconList = new ArrayList<Beacon>();
-            mInflator = MyPairingFragment.this.getActivity().getLayoutInflater();
-        }
-
-        public void addDevice(Beacon beacon) {
-            for(Beacon b : beaconList) {
-                if(b.getMajor() == beacon.getMajor() && b.getMinor() == beacon.getMinor()) {
-                    beaconList.remove(b);
-                    break;
-                }
-            }
-            beaconList.add(beacon);
-        }
-
-        public Beacon getDevice(int position) {
-            return beaconList.get(position);
-        }
-
-        public void clear() {
-            beaconList.clear();
-        }
-
-        @Override
-        public int getCount() {
-            return beaconList.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return beaconList.get(i);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-//            ViewHolder viewHolder;
-//            // General ListView optimization code.
-//            if (view == null) {
-//                view = mInflator.inflate(R.layout.listitem_device, null);
-//                viewHolder = new ViewHolder();
-//                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-//                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
-//                view.setTag(viewHolder);
-//            } else {
-//                viewHolder = (ViewHolder) view.getTag();
-//            }
-//
-//            BluetoothDevice device = beaconList.get(i);
-//            final String deviceName = device.getName();
-//            if (deviceName != null && deviceName.length() > 0)
-//                viewHolder.deviceName.setText(deviceName);
-//            else
-//                viewHolder.deviceName.setText(R.string.unknown_device);
-//            viewHolder.deviceAddress.setText(device.getAddress());
-//
-            return view;
-        }
-    }
 }
