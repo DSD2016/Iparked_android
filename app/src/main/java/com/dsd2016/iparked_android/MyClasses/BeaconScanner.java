@@ -118,7 +118,9 @@ public class BeaconScanner {
             int manKey = data.keyAt(0);
             int major = ((data.get(manKey)[18] << 8) | (data.get(manKey)[19] & 0xFF)) & 0xFFFF;
             int minor = ((data.get(manKey)[20] << 8) | (data.get(manKey)[21] & 0xFF)) & 0xFFFF;
+            int txPower = data.get(manKey)[22];
             int rssi = result.getRssi();
+            Log.i("bah", "txPower: "+ txPower + ", rssi: " + rssi);
             String name = record.getDeviceName();
             String uuid;
             try{
@@ -128,8 +130,8 @@ public class BeaconScanner {
                 uuid = "--";
             }
             //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+rssi);
-            addToBeaconList(major, minor, rssi, name, uuid);
-            beaconListAdapter.addBeacon(new Beacon(major, minor, rssi, name, uuid));
+            addToBeaconList(major, minor, txPower, rssi, name, uuid);
+            beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
             beaconListAdapter.notifyDataSetChanged();
         }
 
@@ -152,7 +154,7 @@ public class BeaconScanner {
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] record) {
                     int major = ((record[18] << 8) | (record[19] & 0xFF)) & 0xFFFF;
                     int minor = ((record[20] << 8) | (record[21] & 0xFF)) & 0xFFFF;
-                    int RSSI = rssi;
+                    int txPower = record[22];
                     String name = device.getName();
                     String uuid;
                     try{
@@ -166,19 +168,19 @@ public class BeaconScanner {
                         uuid = "--";
                     }
                     //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
-                    addToBeaconList(major, minor, rssi, name, uuid);
-                    beaconListAdapter.addBeacon(new Beacon(major, minor, rssi, name, uuid));
+                    addToBeaconList(major, minor, txPower, rssi, name, uuid);
+                    beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
                     beaconListAdapter.notifyDataSetChanged();
                 }
             };
 
-    private void addToBeaconList(int major, int minor, int rssi, String name, String uuid) {
+    private void addToBeaconList(int major, int minor, int txPower, int rssi, String name, String uuid) {
         for(Beacon b : beaconList) {
             if(b.getMajor() == major && b.getMinor() == minor) {
                 beaconList.remove(b);
                 break;
             }
         }
-        beaconList.add(new Beacon(major, minor, rssi, name, uuid));
+        beaconList.add(new Beacon(major, minor, txPower, rssi, name, uuid));
     }
 }

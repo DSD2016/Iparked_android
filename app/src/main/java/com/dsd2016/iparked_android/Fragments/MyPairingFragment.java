@@ -140,7 +140,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
                     }
                     viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
                     viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
-                    viewHolder.beaconDistance.setText("Distance: " + beacon.getRssi());
+                    viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
                     return view;
                 }
             };
