@@ -39,6 +39,7 @@ public abstract class BeaconListAdapter extends BaseAdapter{
 
         public void clear() {
             beaconList.clear();
+            this.notifyDataSetChanged();
         }
 
         @Override

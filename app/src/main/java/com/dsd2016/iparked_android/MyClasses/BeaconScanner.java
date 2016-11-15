@@ -22,6 +22,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by Mihovil and Hrvoje on 14.11.2016..
  */
@@ -35,11 +37,18 @@ public class BeaconScanner {
     private ScanSettings settings;
     private Handler mHandler;
     private boolean scanning;
+    private boolean gui = false;
     private List<Beacon> beaconList;
     private BeaconListAdapter beaconListAdapter;
 
     public List<Beacon> getBeaconList() {
         return beaconList;
+    }
+
+    public BeaconScanner(Context context, BeaconListAdapter beaconListAdapter) {
+        this(context);
+        this.beaconListAdapter = beaconListAdapter;
+        gui = true;
     }
 
     public BeaconScanner(Context context) {
@@ -53,10 +62,6 @@ public class BeaconScanner {
         beaconList = new ArrayList<Beacon>();
     }
 
-    public void scanForBeacons(BeaconListAdapter beaconListAdapter){
-        this.beaconListAdapter = beaconListAdapter;
-        scanForBeacons();
-    }
     public void scanForBeacons (){
 
         if (Build.VERSION.SDK_INT > 20) {
@@ -68,6 +73,11 @@ public class BeaconScanner {
             filters = new ArrayList<ScanFilter>();
         }
         scanLeDevice();
+     /*   try{
+            sleep(1100);
+        }catch (InterruptedException e){
+            Log.i("bah", "interupted sleep");
+        }*/
     }
 
     public boolean isBluetoothEnabled(){
@@ -113,26 +123,14 @@ public class BeaconScanner {
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            ScanRecord record = result.getScanRecord();
-            SparseArray<byte[]> data = record.getManufacturerSpecificData();
+            ScanRecord scanRecord = result.getScanRecord();
+            SparseArray<byte[]> data = scanRecord.getManufacturerSpecificData();
             int manKey = data.keyAt(0);
-            int major = ((data.get(manKey)[18] << 8) | (data.get(manKey)[19] & 0xFF)) & 0xFFFF;
-            int minor = ((data.get(manKey)[20] << 8) | (data.get(manKey)[21] & 0xFF)) & 0xFFFF;
-            int txPower = data.get(manKey)[22];
+            byte[] record = data.get(manKey);
             int rssi = result.getRssi();
-            Log.i("bah", "txPower: "+ txPower + ", rssi: " + rssi);
-            String name = record.getDeviceName();
-            String uuid;
-            try{
-                uuid = record.getServiceUuids().toString();
-            }
-            catch (NullPointerException e){
-                uuid = "--";
-            }
-            //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+rssi);
-            addToBeaconList(major, minor, txPower, rssi, name, uuid);
-            beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
-            beaconListAdapter.notifyDataSetChanged();
+            String name = scanRecord.getDeviceName();
+
+            addBeaconRecord(record, name, rssi);
         }
 
         @Override
@@ -152,25 +150,9 @@ public class BeaconScanner {
             new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] record) {
-                    int major = ((record[18] << 8) | (record[19] & 0xFF)) & 0xFFFF;
-                    int minor = ((record[20] << 8) | (record[21] & 0xFF)) & 0xFFFF;
-                    int txPower = record[22];
+
                     String name = device.getName();
-                    String uuid;
-                    try{
-                        StringBuilder buffer = new StringBuilder();
-                        for(int i = 2; i < 18; i++) {
-                            buffer.append(String.format("%02x", record[i]));
-                        }
-                        uuid = buffer.toString();
-                    }
-                    catch (NullPointerException e){
-                        uuid = "--";
-                    }
-                    //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
-                    addToBeaconList(major, minor, txPower, rssi, name, uuid);
-                    beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
-                    beaconListAdapter.notifyDataSetChanged();
+                    addBeaconRecord(record, name, rssi);
                 }
             };
 
@@ -182,5 +164,32 @@ public class BeaconScanner {
             }
         }
         beaconList.add(new Beacon(major, minor, txPower, rssi, name, uuid));
+    }
+
+    private void addBeaconRecord(byte[] record, String name, int rssi) {
+
+        int major = ((record[18] << 8) | (record[19] & 0xFF)) & 0xFFFF;
+        int minor = ((record[20] << 8) | (record[21] & 0xFF)) & 0xFFFF;
+        int txPower = record[22];
+        String uuid;
+        try{
+            StringBuilder buffer = new StringBuilder();
+            for(int i = 2; i < 18; i++) {
+                buffer.append(String.format("%02x", record[i]));
+            }
+            uuid = buffer.toString();
+        }
+        catch (NullPointerException e){
+            uuid = "--";
+        }
+        //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
+
+        if(gui){
+            beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
+            beaconListAdapter.notifyDataSetChanged();
+        }else{
+            addToBeaconList(major, minor, txPower, rssi, name, uuid);
+        }
+
     }
 }
