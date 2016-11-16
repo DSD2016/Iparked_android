@@ -7,8 +7,6 @@ import android.util.Log;
 
 public class OnBootReceiver extends BroadcastReceiver {
 
-    OnAlarmReceiver alarm = new OnAlarmReceiver();
-
     @Override
     public void onReceive(Context context, Intent intent) {
         if ( intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED) ) {

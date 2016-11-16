@@ -4,6 +4,7 @@
     <string name="setting_placeholder1">iBeacon not paired</string>
 
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="scan_button_string">Scan</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_first_section">First Section</string>
     <string name="title_checkbox_preference">Checkbox</string>
