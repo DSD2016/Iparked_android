@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 import com.dsd2016.iparked_android.R;
+import com.dsd2016.iparked_android.Services.BeaconProximityService;
+
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -25,6 +27,9 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 startActivity(new Intent(SplashActivity.this,MainActivity.class));
             }
-        }, 5000);
+        }, 1000);
+
+        // Start proximity service
+        this.startService(new Intent(this, BeaconProximityService.class));
     }
 }
