@@ -31,7 +31,7 @@ import static java.lang.Thread.sleep;
 public class BeaconScanner {
 
     private BluetoothAdapter mBluetoothAdapter;
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 1000;
     private List<ScanFilter> filters;
     private BluetoothLeScanner mLEScanner;
     private ScanSettings settings;
