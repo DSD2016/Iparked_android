@@ -1,6 +1,5 @@
 package com.dsd2016.iparked_android.Services;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -8,11 +7,14 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
+
 public class BeaconProximityService extends Service {
 
     // TODO substitute with value from UI
     private int interval = 1000;
-    Handler mHandler = new Handler();
+    private Handler mHandler = new Handler();
+    private BeaconScanner scanner;
 
     public BeaconProximityService() {
         super();
@@ -22,6 +24,7 @@ public class BeaconProximityService extends Service {
     public void onCreate() {
         super.onCreate();
         startRepeatingTask();
+        scanner = new BeaconScanner(this);
     }
 
     @Override
@@ -33,12 +36,12 @@ public class BeaconProximityService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.v("iParked", "onBind");
         return null;
     }
 
     public void getNearbyBeacons() {
         Log.v("iParked", "GetBeacons");
+        scanner.scanForBeacons();
     }
 
     Runnable mHandlerTask = new Runnable()

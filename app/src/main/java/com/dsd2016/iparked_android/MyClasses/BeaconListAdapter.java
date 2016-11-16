@@ -9,9 +9,6 @@ import com.dsd2016.iparked_android.Fragments.MyPairingFragment;
 
 import java.util.ArrayList;
 
-/**
- * Created by Hrvoje on 14.11.2016..
- */
 
 public abstract class BeaconListAdapter extends BaseAdapter{
         protected ArrayList<Beacon> beaconList;
