@@ -24,7 +24,6 @@ public class BeaconProximityService extends Service {
     public void onCreate() {
         super.onCreate();
         startRepeatingTask();
-        scanner = new BeaconScanner(this);
     }
 
     @Override
@@ -41,6 +40,9 @@ public class BeaconProximityService extends Service {
 
     public void getNearbyBeacons() {
         Log.v("iParked", "GetBeacons");
+        if (scanner == null) {
+            scanner = new BeaconScanner(this);
+        }
         scanner.scanForBeacons();
     }
 
