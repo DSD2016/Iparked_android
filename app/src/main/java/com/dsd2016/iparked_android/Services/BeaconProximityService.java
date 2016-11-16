@@ -1,16 +1,60 @@
 package com.dsd2016.iparked_android.Services;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
-public class BeaconProximityService extends IntentService {
+public class BeaconProximityService extends Service {
+
+    // TODO substitute with value from UI
+    private int interval = 1000;
+    Handler mHandler = new Handler();
 
     public BeaconProximityService() {
-        super("BeaconProximity");
+        super();
     }
 
     @Override
-    protected void onHandleIntent(Intent workIntent) {
-        String dataString = workIntent.getDataString();
+    public void onCreate() {
+        super.onCreate();
+        startRepeatingTask();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.v("iParked", "onBind");
+        return null;
+    }
+
+    public void getNearbyBeacons() {
+        Log.v("iParked", "GetBeacons");
+    }
+
+    Runnable mHandlerTask = new Runnable()
+    {
+        @Override
+        public void run() {
+            getNearbyBeacons();
+            mHandler.postDelayed(mHandlerTask, interval);
+        }
+    };
+
+    void startRepeatingTask() {
+        mHandlerTask.run();
+    }
+
+    void stopRepeatingTask() {
+        mHandler.removeCallbacks(mHandlerTask);
     }
 }
