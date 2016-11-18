@@ -3,7 +3,6 @@ package com.dsd2016.iparked_android.Activities;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -33,10 +32,10 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         hideActionBar();
+        startProximityService();
         animateSplashScreen();
         checkPermissions();
         allowBluetooth();
-        startProximityService();
 
     }
 
@@ -86,7 +85,6 @@ public class SplashActivity extends AppCompatActivity {
             if (BeaconProximityService.class.getName().equals(service.service.getClassName())) {
 
                 this.startService(new Intent(this, BeaconProximityService.class));
-                Log.v("iParked", "Started proximity service");
 
             }
         }

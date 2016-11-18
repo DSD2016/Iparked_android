@@ -14,7 +14,6 @@ public class BeaconProximityService extends Service {
     // TODO substitute with value from UI
     private int interval = 1000;
     private Handler mHandler = new Handler();
-    private BeaconScanner scanner;
 
     public BeaconProximityService() {
         super();
@@ -58,4 +57,6 @@ public class BeaconProximityService extends Service {
     void stopRepeatingTask() {
         mHandler.removeCallbacks(mHandlerTask);
     }
+
+
 }
