@@ -1,9 +1,14 @@
 package com.dsd2016.iparked_android.Activities;
 
+import android.Manifest;
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +22,9 @@ import com.dsd2016.iparked_android.Services.BeaconProximityService;
 
 public class SplashActivity extends AppCompatActivity {
 
+    // Totally random numbers for intents
+    private static final int LOCATION_PERMISSION_REQUEST = 6577;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -26,6 +34,7 @@ public class SplashActivity extends AppCompatActivity {
 
         hideActionBar();
         animateSplashScreen();
+        checkPermissions();
         allowBluetooth();
         startProximityService();
 
@@ -50,9 +59,10 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                /** Make sure Bluetooth is enabled  before transition*/
+                /** Make sure Bluetooth and Location are enabled before transition */
                 BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                while ( !mBluetoothAdapter.isEnabled() ) {
+                while ( !mBluetoothAdapter.isEnabled()
+                        || ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED ) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -60,7 +70,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }
 
-
+                /** Animate to next activity */
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
             }
         }, 1000);
@@ -70,7 +80,28 @@ public class SplashActivity extends AppCompatActivity {
 
     private void startProximityService() {
 
-        this.startService(new Intent(this, BeaconProximityService.class));
+        /** Start proximity service if it already isn't active */
+        ActivityManager manager = (ActivityManager) getSystemService(this.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (BeaconProximityService.class.getName().equals(service.service.getClassName())) {
+
+                this.startService(new Intent(this, BeaconProximityService.class));
+                Log.v("iParked", "Started proximity service");
+
+            }
+        }
+
+    }
+
+
+    private void checkPermissions() {
+
+        int locationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        /** Ask for Fine Location permission */
+        if (locationPermission == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST);
+        }
 
     }
 
@@ -83,12 +114,24 @@ public class SplashActivity extends AppCompatActivity {
             this.finish();
         }
 
-        /** Ask for Bluetooth permission */
+        /** Turn on Bluetooth */
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (!mBluetoothAdapter.isEnabled()){
-            Intent intentBtEnabled = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            int REQUEST_ENABLE_BT = 1;
-            startActivityForResult(intentBtEnabled, REQUEST_ENABLE_BT);
+            mBluetoothAdapter.enable();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+
+            case LOCATION_PERMISSION_REQUEST: {
+                if ( !(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) )
+                    this.finish();
+            }
+
         }
 
     }
