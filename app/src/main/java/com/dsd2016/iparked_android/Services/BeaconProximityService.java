@@ -40,10 +40,6 @@ public class BeaconProximityService extends Service {
 
     public void getNearbyBeacons() {
         Log.v("iParked", "GetBeacons");
-        if (scanner == null) {
-            scanner = new BeaconScanner(this);
-        }
-        scanner.scanForBeacons();
     }
 
     Runnable mHandlerTask = new Runnable()
