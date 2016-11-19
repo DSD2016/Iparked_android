@@ -1,7 +1,10 @@
 package com.dsd2016.iparked_android.Services;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -22,12 +25,14 @@ public class BeaconProximityService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        registerReceiver(this.broadCastNewMessage, new IntentFilter("gimmeSomeBeacons"));
         startRepeatingTask();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(broadCastNewMessage);
         stopRepeatingTask();
     }
 
@@ -40,6 +45,15 @@ public class BeaconProximityService extends Service {
     public void getNearbyBeacons() {
         Log.v("iParked", "GetBeacons");
     }
+
+    BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            sendBroadcast(new Intent().setAction("HereAreSomeBeacons"));
+            Log.i("bah",intent.getAction());
+
+        }
+    };
 
     Runnable mHandlerTask = new Runnable()
     {

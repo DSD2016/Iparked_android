@@ -6,6 +6,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.support.v4.app.ListFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -84,12 +86,8 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         myView.findViewById(R.id.scan_button).setOnClickListener(this);
         myView.findViewById(R.id.fab).setOnClickListener(this);
 
-        //Useless code API 23 and bigger bug
-        if (Build.VERSION.SDK_INT > 22) {
-            getActivity().requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        }
 
-        beaconScanner = new BeaconScanner(getActivity(), beaconListAdapter);
+        beaconScanner = new BeaconScanner(beaconListAdapter);
         return myView;
     }
 
@@ -138,16 +136,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     };
 
-    /**
-     * Callback for runtime permission. Checking if location permission is granted.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
-        if(requestCode == 1)
-        {
-            Log.d("Message", "coarse location permission granted");
-        }
-    }
 
     /**
      * Checks if bluetooth is enabled. If not it starts Activity for enabling bluetooth, else clears
@@ -157,6 +145,9 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     public void onResume() {
 
         super.onResume();
+
+        getActivity().registerReceiver(this.broadCastNewMessage, new IntentFilter("HereAreSomeBeacons"));
+
 
         if (!beaconScanner.isBluetoothEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -168,9 +159,18 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     }
 
+    BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("bah",intent.getAction());
+
+        }
+    };
+
     @Override
     public void onPause() {
         super.onPause();
+        getActivity().unregisterReceiver(broadCastNewMessage);
         if(beaconScanner.isScanning()) {
             beaconScanner.stopScanForBeacons();
         }
@@ -201,6 +201,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             return;
         }else if(v.getId() == R.id.scan_button ){
             if(!beaconScanner.isScanning()){
+                getActivity().sendBroadcast(new Intent().setAction("gimmeSomeBeacons"));
                 beaconListAdapter.clear();
                 beaconScanner.scanForBeacons(1000);
             }

@@ -39,19 +39,14 @@ public class BeaconScanner {
         return beaconList;
     }
 
-    public BeaconScanner(Context context, BeaconListAdapter beaconListAdapter) {
-        this(context);
+    public BeaconScanner(BeaconListAdapter beaconListAdapter) {
+        this();
         this.beaconListAdapter = beaconListAdapter;
         gui = true;
     }
 
-    public BeaconScanner(Context context) {
+    public BeaconScanner() {
         mHandler = new Handler();
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(context, "BLE Not Supported",
-                    Toast.LENGTH_SHORT).show();
-            ((Activity)context).finish();
-        }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         beaconList = new ArrayList<Beacon>();
     }
