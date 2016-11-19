@@ -33,6 +33,7 @@ import com.dsd2016.iparked_android.MyClasses.BeaconListAdapter;
 import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
 import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
+import com.dsd2016.iparked_android.MyClasses.ParcelableBeaconList;
 import com.dsd2016.iparked_android.R;
 import com.ogaclejapan.arclayout.ArcLayout;
 
@@ -163,6 +164,12 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i("bah",intent.getAction());
+            ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
+            List<Beacon> beaconList = parcelableBeaconList.getbeaconList();
+
+            for(Beacon beacon : beaconList){
+                Log.i("bah", "Beacon name: "+beacon.getName());
+            }
 
         }
     };
@@ -203,7 +210,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             if(!beaconScanner.isScanning()){
                 getActivity().sendBroadcast(new Intent().setAction("gimmeSomeBeacons"));
                 beaconListAdapter.clear();
-                beaconScanner.scanForBeacons(1000);
+                //beaconScanner.scanForBeacons(1000);
             }
         }
         if (v instanceof ImageButton) {

@@ -10,12 +10,21 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.dsd2016.iparked_android.MyClasses.Beacon;
 import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
+import com.dsd2016.iparked_android.MyClasses.ParcelableBeaconList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 public class BeaconProximityService extends Service {
 
     // TODO substitute with value from UI
-    private int interval = 1000;
+    private int interval = 1500;
+    private BeaconScanner beaconScanner;
+    private List<Beacon> beaconList;
     private Handler mHandler = new Handler();
 
     public BeaconProximityService() {
@@ -26,6 +35,7 @@ public class BeaconProximityService extends Service {
     public void onCreate() {
         super.onCreate();
         registerReceiver(this.broadCastNewMessage, new IntentFilter("gimmeSomeBeacons"));
+        beaconScanner = new BeaconScanner();
         startRepeatingTask();
     }
 
@@ -43,13 +53,23 @@ public class BeaconProximityService extends Service {
     }
 
     public void getNearbyBeacons() {
-        Log.v("iParked", "GetBeacons");
+        beaconScanner.scanForBeacons(1000);
+        try {
+            sleep(1000);
+        }catch (InterruptedException e){
+            Log.v("bah", "probuden");
+        }
+        beaconList = beaconScanner.getBeaconList();
+
     }
 
     BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            sendBroadcast(new Intent().setAction("HereAreSomeBeacons"));
+            Intent i = new Intent();
+            i.setAction("HereAreSomeBeacons");
+            i.putExtra("BeaconList", new ParcelableBeaconList(beaconList));
+            sendBroadcast(i);
             Log.i("bah",intent.getAction());
 
         }
