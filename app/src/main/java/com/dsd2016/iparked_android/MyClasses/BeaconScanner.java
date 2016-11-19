@@ -26,7 +26,6 @@ import java.util.List;
 public class BeaconScanner {
 
     private BluetoothAdapter mBluetoothAdapter;
-    private static final long SCAN_PERIOD = 1000;
     private List<ScanFilter> filters;
     private BluetoothLeScanner mLEScanner;
     private ScanSettings settings;
@@ -57,7 +56,7 @@ public class BeaconScanner {
         beaconList = new ArrayList<Beacon>();
     }
 
-    public void scanForBeacons () {
+    public void scanForBeacons (long scanPeriod) {
 
         if (Build.VERSION.SDK_INT > 20) {
             mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
@@ -67,13 +66,20 @@ public class BeaconScanner {
                     .build();
             filters = new ArrayList<ScanFilter>();
         }
-        scanLeDevice();
-     /*   try{
-            sleep(1100);
-        }catch (InterruptedException e){
-            Log.i("bah", "interupted sleep");
-        }*/
-        // TODO remove if not needed
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stopScanForBeacons();
+            }
+        }, scanPeriod);
+
+        scanning = true;
+        if (Build.VERSION.SDK_INT < 21) {
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mLEScanner.startScan(null, settings, mScanCallback);
+        }
+
     }
 
     public boolean isBluetoothEnabled(){
@@ -81,7 +87,7 @@ public class BeaconScanner {
     }
 
     public boolean isScanning(){
-        return mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
+        return isBluetoothEnabled() && scanning;
     }
 
     public void stopScanForBeacons() {
@@ -93,21 +99,6 @@ public class BeaconScanner {
         }
     }
 
-    private void scanLeDevice() {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                stopScanForBeacons();
-            }
-        }, SCAN_PERIOD);
-
-        scanning = true;
-        if (Build.VERSION.SDK_INT < 21) {
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        } else {
-            mLEScanner.startScan(null, settings, mScanCallback);
-        }
-    }
 
     @SuppressLint("NewApi")
     private ScanCallback mScanCallback = new ScanCallback() {

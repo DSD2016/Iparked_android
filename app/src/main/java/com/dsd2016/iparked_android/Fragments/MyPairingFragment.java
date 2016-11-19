@@ -93,7 +93,21 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         return myView;
     }
 
+    /**
+     *Class that holds beacon GUI
+     */
+    static class ViewHolder {
+        TextView beaconName;
+        TextView beaconUuid;
+        TextView beaconNumbers;
+        TextView beaconDistance;
+    }
+
     BeaconListAdapter beaconListAdapter = new BeaconListAdapter(mInflator) {
+        /**
+         * Implementation of getView method. Method is called when new beacon is added BeaconListAdapter.
+         * It creates a new beacon_list_view, if it doesn't already exist, and fills it with beacon data.
+         */
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             ViewHolder viewHolder;
@@ -124,7 +138,9 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     };
 
-    //Useless code API 23 and bigger bug
+    /**
+     * Callback for runtime permission. Checking if location permission is granted.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         if(requestCode == 1)
@@ -133,6 +149,10 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     }
 
+    /**
+     * Checks if bluetooth is enabled. If not it starts Activity for enabling bluetooth, else clears
+     * beaconListAdapter.
+      */
     @Override
     public void onResume() {
 
@@ -148,13 +168,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     }
 
-    static class ViewHolder {
-        TextView beaconName;
-        TextView beaconUuid;
-        TextView beaconNumbers;
-        TextView beaconDistance;
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -163,11 +176,13 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     }
 
+    /**
+     * Callback for enabling bluetooth. Checks if user has enabled bluetooth.
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Bluetooth not enabled.
                 getActivity().finish();
                 return;
             }
@@ -187,7 +202,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }else if(v.getId() == R.id.scan_button ){
             if(!beaconScanner.isScanning()){
                 beaconListAdapter.clear();
-                beaconScanner.scanForBeacons();
+                beaconScanner.scanForBeacons(1000);
             }
         }
         if (v instanceof ImageButton) {
