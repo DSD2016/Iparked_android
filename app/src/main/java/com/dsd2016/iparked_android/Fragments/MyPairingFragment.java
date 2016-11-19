@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.support.v4.app.ListFragment;
-import android.bluetooth.BluetoothAdapter;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -24,13 +24,13 @@ import android.view.animation.DecelerateInterpolator;
 
 import android.widget.ImageButton;
 
-import android.widget.TextView;
+import android.widget.ListView;
+
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
 import com.dsd2016.iparked_android.MyClasses.Beacon;
 import com.dsd2016.iparked_android.MyClasses.BeaconListAdapter;
-import com.dsd2016.iparked_android.MyClasses.BeaconScanner;
 import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.MyClasses.ParcelableBeaconList;
@@ -49,10 +49,10 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
+    private ListView listView;
     LayoutInflater mInflator;
-    private BeaconScanner beaconScanner;
+
     private OnMenuItemSelectedListener mListener;
-    private int REQUEST_ENABLE_BT = 1;
 
 
     @Override
@@ -87,55 +87,10 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         myView.findViewById(R.id.scan_button).setOnClickListener(this);
         myView.findViewById(R.id.fab).setOnClickListener(this);
 
+        listView = (ListView) myView.findViewById(android.R.id.list);
 
-        beaconScanner = new BeaconScanner(beaconListAdapter);
         return myView;
     }
-
-    /**
-     *Class that holds beacon GUI
-     */
-    static class ViewHolder {
-        TextView beaconName;
-        TextView beaconUuid;
-        TextView beaconNumbers;
-        TextView beaconDistance;
-    }
-
-    BeaconListAdapter beaconListAdapter = new BeaconListAdapter(mInflator) {
-        /**
-         * Implementation of getView method. Method is called when new beacon is added BeaconListAdapter.
-         * It creates a new beacon_list_view, if it doesn't already exist, and fills it with beacon data.
-         */
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            ViewHolder viewHolder;
-            // General ListView optimization code.
-            if (view == null) {
-                view = mInflator.inflate(R.layout.beacon_list_view, null);
-                viewHolder = new ViewHolder();
-                viewHolder.beaconName = (TextView) view.findViewById(R.id.beacon_name);
-                viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
-                viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
-                viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
-                view.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) view.getTag();
-            }
-
-            Beacon beacon = beaconList.get(i);
-            final String deviceName = beacon.getName();
-            if (deviceName != null && deviceName.length() > 0) {
-                viewHolder.beaconName.setText("Name: "+deviceName);
-            }else {
-                viewHolder.beaconName.setText("Name: unknown");
-            }
-            viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
-            viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
-            viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
-            return view;
-        }
-    };
 
 
     /**
@@ -149,15 +104,8 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
 
         getActivity().registerReceiver(this.broadCastNewMessage, new IntentFilter("HereAreSomeBeacons"));
 
+        mInflator = getActivity().getLayoutInflater();
 
-        if (!beaconScanner.isBluetoothEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } else {
-            mInflator = getActivity().getLayoutInflater();
-            beaconListAdapter.clear();
-            setListAdapter(beaconListAdapter);
-        }
     }
 
     BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
@@ -165,11 +113,8 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
             Log.i("bah",intent.getAction());
             ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
-            List<Beacon> beaconList = parcelableBeaconList.getbeaconList();
-
-            for(Beacon beacon : beaconList){
-                Log.i("bah", "Beacon name: "+beacon.getName());
-            }
+            ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
+            listView.setAdapter(new BeaconListAdapter(mInflator, beaconList));
 
         }
     };
@@ -178,24 +123,9 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(broadCastNewMessage);
-        if(beaconScanner.isScanning()) {
-            beaconScanner.stopScanForBeacons();
-        }
     }
 
-    /**
-     * Callback for enabling bluetooth. Checks if user has enabled bluetooth.
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_CANCELED) {
-                getActivity().finish();
-                return;
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+
 
     public static MyPairingFragment newInstance() {
         return new MyPairingFragment();
@@ -207,11 +137,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             onFabClick(v);
             return;
         }else if(v.getId() == R.id.scan_button ){
-            if(!beaconScanner.isScanning()){
-                getActivity().sendBroadcast(new Intent().setAction("gimmeSomeBeacons"));
-                beaconListAdapter.clear();
-                //beaconScanner.scanForBeacons(1000);
-            }
+            getActivity().sendBroadcast(new Intent().setAction("gimmeSomeBeacons"));
         }
         if (v instanceof ImageButton) {
             switchfrag((ImageButton) v);

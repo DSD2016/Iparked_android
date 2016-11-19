@@ -1,42 +1,28 @@
 package com.dsd2016.iparked_android.MyClasses;
 
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import com.dsd2016.iparked_android.Fragments.MyPairingFragment;
+import com.dsd2016.iparked_android.R;
 
 import java.util.ArrayList;
 
 
-public abstract class BeaconListAdapter extends BaseAdapter{
+
+public class BeaconListAdapter extends BaseAdapter{
         protected ArrayList<Beacon> beaconList;
         private LayoutInflater mInflator;
 
-        public BeaconListAdapter(LayoutInflater mInflator) {
-            super();
-            beaconList = new ArrayList<>();
-            this.mInflator = mInflator;
-        }
 
-        public void addBeacon(Beacon beacon) {
-            for(Beacon b : beaconList) {
-                if(b.getMajor() == beacon.getMajor() && b.getMinor() == beacon.getMinor()) {
-                    beaconList.remove(b);
-                    break;
-                }
-            }
-            beaconList.add(beacon);
-        }
-
-        public Beacon getBeacon(int position) {
-            return beaconList.get(position);
-        }
-
-        public void clear() {
-            beaconList.clear();
-            this.notifyDataSetChanged();
+        public BeaconListAdapter(LayoutInflater mInflator, ArrayList<Beacon> beaconList ) {
+         super();
+         this.beaconList = beaconList;
+         this.mInflator = mInflator;
         }
 
         @Override
@@ -54,7 +40,43 @@ public abstract class BeaconListAdapter extends BaseAdapter{
             return i;
         }
 
+        /**
+         *Class that holds beacon GUI
+         */
+        static class ViewHolder {
+            TextView beaconName;
+            TextView beaconUuid;
+            TextView beaconNumbers;
+            TextView beaconDistance;
+        }
+
         @Override
-        public abstract View getView(int i, View view, ViewGroup viewGroup);
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            ViewHolder viewHolder;
+            // General ListView optimization code.
+            if (view == null) {
+                view = mInflator.inflate(R.layout.beacon_list_view, viewGroup,false);
+                viewHolder = new ViewHolder();
+                viewHolder.beaconName = (TextView) view.findViewById(R.id.beacon_name);
+                viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
+                viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
+                viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
+                view.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
+            }
+
+            Beacon beacon = beaconList.get(i);
+            final String deviceName = beacon.getName();
+            if (deviceName != null && deviceName.length() > 0) {
+                viewHolder.beaconName.setText("Name: "+deviceName);
+            }else {
+                viewHolder.beaconName.setText("Name: unknown");
+            }
+            viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
+            viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
+            viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
+            return view;
+        }
 
 }

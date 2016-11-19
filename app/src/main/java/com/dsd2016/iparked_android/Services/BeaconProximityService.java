@@ -22,7 +22,7 @@ import static java.lang.Thread.sleep;
 public class BeaconProximityService extends Service {
 
     // TODO substitute with value from UI
-    private int interval = 1500;
+    private int interval = 700;
     private BeaconScanner beaconScanner;
     private List<Beacon> beaconList;
     private Handler mHandler = new Handler();
@@ -53,11 +53,11 @@ public class BeaconProximityService extends Service {
     }
 
     public void getNearbyBeacons() {
-        beaconScanner.scanForBeacons(1000);
+        beaconScanner.scanForBeacons(500);
         try {
-            sleep(1000);
+            sleep(600);
         }catch (InterruptedException e){
-            Log.v("bah", "probuden");
+            Log.v("bah", "Woke up early!");
         }
         beaconList = beaconScanner.getBeaconList();
 

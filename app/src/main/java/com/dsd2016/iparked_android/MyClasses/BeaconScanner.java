@@ -1,7 +1,7 @@
 package com.dsd2016.iparked_android.MyClasses;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -10,14 +10,12 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.Context;
-import android.content.pm.PackageManager;
+
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
 import android.util.SparseArray;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,24 +29,17 @@ public class BeaconScanner {
     private ScanSettings settings;
     private Handler mHandler;
     private boolean scanning;
-    private boolean gui = false;
     private List<Beacon> beaconList;
-    private BeaconListAdapter beaconListAdapter;
 
     public List<Beacon> getBeaconList() {
         return beaconList;
     }
 
-    public BeaconScanner(BeaconListAdapter beaconListAdapter) {
-        this();
-        this.beaconListAdapter = beaconListAdapter;
-        gui = true;
-    }
 
     public BeaconScanner() {
         mHandler = new Handler();
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        beaconList = new ArrayList<Beacon>();
+        beaconList = new ArrayList<>();
     }
 
     public void scanForBeacons (long scanPeriod) {
@@ -59,7 +50,7 @@ public class BeaconScanner {
                     .setReportDelay(0)
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
                     .build();
-            filters = new ArrayList<ScanFilter>();
+            filters = new ArrayList<>();
         }
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -161,15 +152,8 @@ public class BeaconScanner {
         catch (NullPointerException e) {
             uuid = "--";
         }
-        //Log.i("bah", "Device name: "+name+"  UUID: "+uuid+"  major/minor: "+major+"/"+minor+"   RSSI: "+RSSI);
 
-        if (gui) {
-            beaconListAdapter.addBeacon(new Beacon(major, minor, txPower, rssi, name, uuid));
-            beaconListAdapter.notifyDataSetChanged();
-        }
-        else {
-            addToBeaconList(major, minor, txPower, rssi, name, uuid);
-        }
+        addToBeaconList(major, minor, txPower, rssi, name, uuid);
 
     }
 }
