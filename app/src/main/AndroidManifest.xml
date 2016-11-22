@@ -6,10 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application
+        android:name=".MyClasses.IparkedApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_iparked_logo"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCU1dQbp4oIs2_u6xl99umcUzECEpTB7KQ"/>
         <activity android:name=".Activities.MainActivity">
@@ -23,7 +26,6 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
 
         </activity>
-        <service android:name=".MyClasses.CurrentLocationProvider" />
 
     </application>
 
