@@ -9,8 +9,10 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,9 +36,6 @@ import com.dsd2016.iparked_android.MyClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.MyClasses.OnGotLastLocation;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,14 +43,18 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.ogaclejapan.arclayout.ArcLayout;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyMapFragment extends Fragment implements View.OnClickListener, OnMapReadyCallback,OnGotLastLocation {
+public class MyMapFragment extends Fragment implements View.OnClickListener, OnMapReadyCallback, OnGotLastLocation {
     private static final String TAG = "MAP_FRAGMENT";
     Toast toast = null;
     ClipRevealFrame menuLayout;
@@ -62,7 +65,7 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
 
     OnMenuItemSelectedListener mListener;
     protected MapView mapView;
-    protected GoogleMap googleMap,map;
+    protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
@@ -162,7 +165,6 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     }
 
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
 
@@ -343,14 +345,15 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     }
 
     private void modifyMap(GoogleMap googleMap) {
-        map=googleMap;
+        map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(true);
         MapsInitializer.initialize(this.getContext());
-        myLocationProvider=new MyLocationProvider(getContext(),this);
+        myLocationProvider = new MyLocationProvider(getContext(), this);
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
@@ -370,11 +373,22 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     }
 
     public void onGotLastLocation(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude()+0.005);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude() + 0.005);
+        LatLng fer_parking = new LatLng(45.800617, 15.971309);
+        Bitmap bm=BitmapFactory.decodeResource(getResources(),R.drawable.iparked_garage_fer);
+
+        GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
+                .position(fer_parking, 256f, 512f);
+        map.addGroundOverlay(ferParkingMap);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 15);
         map.animateCamera(cameraUpdate);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }
         map.setMyLocationEnabled(true);
         map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 12/11/2016 12:12:12"));
+        map.addMarker(new MarkerOptions().position(fer_parking).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 15/11/2016 10:25:32"));
     }
     public void CheckContinue(){
         myLocationProvider.Continue();

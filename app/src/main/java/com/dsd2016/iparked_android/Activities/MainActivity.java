@@ -15,6 +15,7 @@ import com.dsd2016.iparked_android.R;
 
 public class MainActivity extends AppCompatActivity implements OnMenuItemSelectedListener {
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
