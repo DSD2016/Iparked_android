@@ -55,6 +55,7 @@ public class BeaconProximityService extends Service {
     public void getNearbyBeacons() {
         beaconScanner.scanForBeacons(1000);
         try {
+            Log.v("bah", "Sleeping/scanning");
             sleep(1000);
         }catch (InterruptedException e){
             Log.v("bah", "Woke up early!");
@@ -68,6 +69,7 @@ public class BeaconProximityService extends Service {
         public void onReceive(Context context, Intent intent) {
             Intent i = new Intent();
             i.setAction("HereAreSomeBeacons");
+            Log.i("bah","HereAreSomeBeacons: " + beaconList.size());
             i.putExtra("BeaconList", new ParcelableBeaconList(beaconList));
             sendBroadcast(i);
             //Log.i("bah",intent.getAction());

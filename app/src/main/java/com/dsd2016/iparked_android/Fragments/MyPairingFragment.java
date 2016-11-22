@@ -40,7 +40,12 @@ import com.ogaclejapan.arclayout.ArcLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * This fragment lists out nearby beacons in clickable list. When user clicks on certain beacon, he
+ * is offered to add that beacon as personal. Nearby beacons are acquired by sending Broadcast.
+ * Broadcast is received by BeaconProximityService which than sends beacons back through another
+ * Broadcast.
+ */
 public class MyPairingFragment extends ListFragment implements View.OnClickListener {
 
     private static final String TAG = "PAIRING_FRAGMENT";
@@ -50,7 +55,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     View centerItem;
     View rootLayout;
     private ListView listView;
-    LayoutInflater mInflator;
+    BeaconListAdapter beaconListAdapter;
 
     private OnMenuItemSelectedListener mListener;
 
@@ -89,36 +94,49 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
 
         listView = (ListView) myView.findViewById(android.R.id.list);
 
+        beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater());
+
         return myView;
     }
 
-
     /**
-     * Checks if bluetooth is enabled. If not it starts Activity for enabling bluetooth, else clears
-     * beaconListAdapter.
-      */
+     * Every time fragment is resumed broadcast receiver is registered(It is unregistered
+     * in onPause method). And the list of beacons is cleared.
+     */
     @Override
     public void onResume() {
 
         super.onResume();
 
         getActivity().registerReceiver(this.broadCastNewMessage, new IntentFilter("HereAreSomeBeacons"));
-
-        mInflator = getActivity().getLayoutInflater();
+        beaconListAdapter.clear();
+        listView.setAdapter(beaconListAdapter);
 
     }
 
     BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
+        /**
+         * This method is called by OS when new broadcast is received. Here we are extracting
+         * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
+         * @param context
+         * @param intent
+         */
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i("bah",intent.getAction());
             ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
             ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
-            listView.setAdapter(new BeaconListAdapter(mInflator, beaconList));
+            beaconListAdapter.clear();
+            beaconListAdapter.addAll(beaconList);
+            beaconListAdapter.notifyDataSetChanged();
 
         }
     };
 
+    /**
+     * Every time fragment is paused broadcast receiver is unregistered(It is unregistered
+     * in onResume method).
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -126,11 +144,15 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     }
 
 
-
     public static MyPairingFragment newInstance() {
         return new MyPairingFragment();
     }
 
+    /**
+     * Method is every time something is clicked on the screen. If scan button is clicked Broadcast
+     * is sent requesting nearby beacons.
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab) {
@@ -143,10 +165,12 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             switchfrag((ImageButton) v);
         }
     }
+
     private void switchfrag(ImageButton btn) {
         this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
+
     private void onFabClick(View v) {
         int x = (v.getLeft() + v.getRight()) / 2;
         int y = (v.getTop() + v.getBottom()) / 2;

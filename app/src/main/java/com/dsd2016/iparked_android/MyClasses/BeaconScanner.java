@@ -44,6 +44,8 @@ public class BeaconScanner {
 
     public void scanForBeacons (long scanPeriod) {
 
+        beaconList.clear();
+
         if (Build.VERSION.SDK_INT > 20) {
             mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
             settings = new ScanSettings.Builder()
