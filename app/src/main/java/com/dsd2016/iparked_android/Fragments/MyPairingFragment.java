@@ -6,7 +6,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.support.v4.app.ListFragment;
 
@@ -22,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import android.widget.ListView;
@@ -164,6 +167,80 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         if (v instanceof ImageButton) {
             switchfrag((ImageButton) v);
         }
+    }
+
+    private void addBeacon(Beacon beacon){                                                       // Add beacon to Database
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to give a custom name to the beacon
+        builder.setTitle(R.string.inputdialogtitle);
+
+        final EditText input = new EditText(getContext());
+
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String name = input.getText().toString();
+                //add to the database
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
+    }
+
+    private void editBeacon(Beacon beacon){                                         // Edit the selected beacon
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to modify the custom name
+        builder.setTitle(R.string.editdialogtitle);
+
+        final EditText input = new EditText(getContext());
+        // change the text to the name of the beacon
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String name = input.getText().toString();
+                //update to the database
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void deleteBeacon(Beacon beacon){                                       // delete selected beacon from database
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to confirm deletion
+        builder.setTitle(R.string.editdialogtitle);
+
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                // delete the beacon from database
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
     }
 
     private void switchfrag(ImageButton btn) {

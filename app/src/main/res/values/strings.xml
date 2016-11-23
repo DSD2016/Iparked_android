@@ -16,4 +16,6 @@
     <string name="title_list_preference">List Preference</string>
     <string name="dialog_title_list_preference">List Title</string>
     <string name="error_ble_unavailable">Unsupported device - Bluetooth LE not available</string>
+    <string name="inputdialogtitle">Enter a name for this beacon</string>
+    <string name="editdialogtitle">Edit beacon name</string>
 </resources>
