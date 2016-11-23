@@ -30,31 +30,39 @@ public class Beacon implements Parcelable{
         this.stored = stored;
     }
 
+    public Beacon(String uuid, int major, int minor, double distance) {
+        this.uuid = uuid;
+        this.major = major;
+        this.minor = minor;
+        this.distance = distance;
+    }
+
+    public Beacon(Parcel in) {
+        major = in.readInt();
+        minor = in.readInt();
+        txPower = in.readInt();
+        rssi = in.readInt();
+        name = in.readString();
+        uuid = in.readString();
+        distance = in.readDouble();
+        boolean[] temparray = new boolean[1];
+        in.readBooleanArray(temparray);
+        stored = temparray[0];
+    }
+
     private String uuid;
 
     public int getMajor() {
         return major;
     }
 
-    public void setMajor(int major) {
-        this.major = major;
-    }
-
     public int getMinor() {
         return minor;
     }
 
-    public void setMinor(int minor) {
-        this.minor = minor;
-    }
-
     public int getTxPower() {return txPower;}
 
-    public void setTxPower(int txPower) {this.txPower = txPower;}
-
     public int getRssi() {return rssi;}
-
-    public void setRssi(int rssi) {this.rssi = rssi;}
 
     public String getName() {return name;}
 
@@ -64,11 +72,7 @@ public class Beacon implements Parcelable{
         return uuid;
     }
 
-    public void setUuid(String uuid) {this.uuid = uuid;}
-
     public double getDistance() {return distance;}
-
-    public void setDistance(int distance) {this.distance = distance;}
 
     public void setDistance(int txPower, int rssi) {
         if (rssi == 0) {
@@ -82,21 +86,9 @@ public class Beacon implements Parcelable{
     public void setStored(boolean stored){
         this.stored = stored;
     }
+
     public boolean getStored(){
         return this.stored;
-    }
-
-    public Beacon (Parcel in) {
-        major = in.readInt();
-        minor = in.readInt();
-        txPower = in.readInt();
-        rssi = in.readInt();
-        name = in.readString();
-        uuid = in.readString();
-        distance = in.readDouble();
-        boolean[] temparray = new boolean[1];
-        in.readBooleanArray(temparray);
-        stored = temparray[0];
     }
 
     @Override

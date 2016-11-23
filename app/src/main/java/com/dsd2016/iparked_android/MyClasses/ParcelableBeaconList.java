@@ -21,7 +21,7 @@ public class ParcelableBeaconList implements Parcelable {
     }
 
     public ParcelableBeaconList (Parcel parcel) {
-        parcel.readTypedList(beaconList,Beacon.CREATOR);
+        parcel.readTypedList(beaconList, Beacon.CREATOR);
     }
 
     public List<Beacon> getbeaconList() {
