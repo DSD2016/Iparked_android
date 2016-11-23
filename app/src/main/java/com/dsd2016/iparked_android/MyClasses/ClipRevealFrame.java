@@ -6,9 +6,6 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-/**
- * Created by Saeedek on 09-Nov-16.
- */
 
 public class ClipRevealFrame extends FrameLayout {
     boolean clipOutlines;

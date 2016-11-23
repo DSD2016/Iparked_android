@@ -6,52 +6,18 @@
     tools:context="com.dsd2016.iparked_android.Fragments.MyPairingFragment"
     android:id="@+id/root_layout">
 
-
-    <LinearLayout
-        android:orientation="vertical"
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center">
+        android:layout_height="409dp" />
 
-        <TextView
-            android:text="iBeacon Connection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView3"
-            android:textSize="24sp"
-            android:textColor="@android:color/black"
-            android:textAlignment="center"
-            android:textStyle="normal|bold"
-            android:layout_marginTop="10dp" />
 
-        <TextView
-            android:text="Distance N/A"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/txt_distance"
-            android:textSize="24sp"
-            android:textColor="@android:color/black"
-            android:textStyle="normal|bold"
-            android:textAlignment="center" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/img_connection"
-            app:srcCompat="@drawable/error"
-            android:layout_marginTop="10dp" />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/hand"
-            android:id="@+id/btn_connect"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/tumblr_white_oval"
-            android:tag="connect" />
-
-    </LinearLayout>
-
+    <Button
+        android:text="@string/scan_button_string"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:id="@+id/scan_button" />
 
     <android.support.design.widget.FloatingActionButton
         android:layout_height="80dp"

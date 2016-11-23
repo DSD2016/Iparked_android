@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dsd2016.iparked_android">
+
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="21" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:name=".MyClasses.IparkedApp"
         android:allowBackup="true"
@@ -14,18 +22,45 @@
         android:hardwareAccelerated="false"
         android:largeHeap="true"
         android:theme="@style/AppTheme">
+
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCU1dQbp4oIs2_u6xl99umcUzECEpTB7KQ"/>
+
         <activity android:name=".Activities.MainActivity">
+        </activity>
+
+        <activity android:name=".Activities.SplashActivity">
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.SplashActivity">
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
 
-        </activity>
+        <receiver
+            android:name=".Services.OnBootReceiver"
+            android:enabled="true"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".Services.BeaconProximityService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
 
     </application>
 
