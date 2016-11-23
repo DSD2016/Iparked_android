@@ -18,8 +18,6 @@
     <string name="permission_location_rationale">We need you to allow for location access</string>
     <string name="button_allow">Allow</string>
     <string name="button_deny">Deny</string>
-    <string name="title_list_preference">List Preference</string>
-    <string name="dialog_title_list_preference">List Title</string>
     <string name="error_ble_unavailable">Unsupported device - Bluetooth LE not available</string>
     <string name="inputdialogtitle">Enter a name for this beacon</string>
     <string name="editdialogtitle">Edit beacon name</string>

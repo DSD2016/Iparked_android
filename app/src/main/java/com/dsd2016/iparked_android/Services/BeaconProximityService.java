@@ -60,7 +60,7 @@ public class BeaconProximityService extends Service {
         }catch (InterruptedException e){
             Log.v("bah", "Woke up early!");
         }
-        beaconList = beaconScanner.getBeaconList();
+        //beaconList = beaconScanner.getBeaconList();
 
     }
 
