@@ -7,6 +7,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,11 +17,13 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
 import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
+import com.dsd2016.iparked_android.MyClasses.IparkedApp;
 import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
 import com.ogaclejapan.arclayout.ArcLayout;
@@ -38,6 +41,7 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
+    Button btn_insert,btn_read,btn_delete;
     OnMenuItemSelectedListener mListener;
     @Override
     public void onAttach(Context context) {
@@ -58,6 +62,30 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
         rootLayout = myView.findViewById(R.id.root_layout);
         arcLayout = (ArcLayout) myView.findViewById(R.id.arc_layout);
         centerItem = myView.findViewById(R.id.center_item);
+        btn_insert=(Button)myView.findViewById(R.id.btn_insert);
+        btn_insert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Long t=IparkedApp.mDbHelper.Insert("Test1","vendortest","123","12","12",getContext());
+                Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        btn_read=(Button)myView.findViewById(R.id.btn_read);
+        btn_read.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Cursor c=IparkedApp.mDbHelper.Read();
+                c.moveToFirst();
+                int a=2;
+            }
+        });
+        btn_delete=(Button)myView.findViewById(R.id.btn_delete);
+        btn_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IparkedApp.mDbHelper.Delete("123123");
+            }
+        });
         centerItem.setOnClickListener(this);
         for (int i = 0, size = arcLayout.getChildCount(); i < size; i++) {
             arcLayout.getChildAt(i).setOnClickListener(this);
@@ -84,7 +112,6 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
         }
     }
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
     private void onFabClick(View v) {
