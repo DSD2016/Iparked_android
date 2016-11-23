@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="entries_list_preference">
-        <item>First Choice</item>
-        <item>Second Choice</item>
+        <item>10 Sec</item>
+        <item>20 Sec</item>
     </string-array>
     <string-array name="entryvalues_list_preference">
-        <item>1</item>
-        <item>2</item>
+        <item>10</item>
+        <item>20</item>
     </string-array>
 </resources>

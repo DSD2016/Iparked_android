@@ -1,7 +1,10 @@
 package com.dsd2016.iparked_android.Activities;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.dsd2016.iparked_android.Fragments.MyAboutFragment;
 import com.dsd2016.iparked_android.Fragments.MyMapFragment;
@@ -11,6 +14,7 @@ import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
 
 public class MainActivity extends AppCompatActivity implements OnMenuItemSelectedListener {
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,5 +94,23 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemSelecte
 
                 break;
         }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+// Check for the integer request code originally supplied to startResolutionForResult().
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        MyMapFragment temp=(MyMapFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                        temp.CheckContinue();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(this, "App won't work without location enabled", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                break;
+        }
+
     }
 }

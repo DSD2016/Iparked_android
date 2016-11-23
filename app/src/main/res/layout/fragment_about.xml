@@ -7,6 +7,33 @@
     android:id="@+id/root_layout">
 
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:text="Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_delete"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="Insert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_insert"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="Read"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_read"
+            android:layout_weight="1" />
+    </LinearLayout>
+
     <TextView
         android:text="Made By Jedi Masters"
         android:layout_width="match_parent"
@@ -17,6 +44,7 @@
         android:textAllCaps="false"
         android:textAlignment="center"
         android:gravity="center" />
+
     <android.support.design.widget.FloatingActionButton
         android:layout_height="80dp"
         android:layout_width="80dp"

@@ -7,11 +7,11 @@
     android:id="@+id/root_layout">
 
 
-    <ImageView
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/imageView2"
-        app:srcCompat="@drawable/mappic" />
+        android:layout_weight="1"/>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_height="80dp"
@@ -20,7 +20,7 @@
         android:layout_marginRight="5dp"
         app:fabSize="normal"
         android:src="@drawable/menu"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|center"
         app:backgroundTint="?attr/actionModeSplitBackground"
         android:id="@+id/fab"
         app:srcCompat="@drawable/menu">
