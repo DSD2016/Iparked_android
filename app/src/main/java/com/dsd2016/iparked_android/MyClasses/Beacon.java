@@ -12,6 +12,7 @@ public class Beacon implements Parcelable{
     private int rssi;
     private String name;
     private double distance;
+    private boolean stored;                                                                         // true if beacon stored in database
 
     public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid) {
         this.major = major;
@@ -21,6 +22,12 @@ public class Beacon implements Parcelable{
         this.name = name;
         this.uuid = uuid;
         setDistance(txPower, rssi);
+        this.stored = false;
+    }
+
+    public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid, boolean stored) { // Beacon creator with stored variable
+        this(major, minor, txPower, rssi, name, uuid);
+        this.stored = stored;
     }
 
     private String uuid;
@@ -72,6 +79,13 @@ public class Beacon implements Parcelable{
         this.distance = Math.pow(ratio, 10);
     }
 
+    public void setStored(boolean stored){
+        this.stored = stored;
+    }
+    public boolean getStored(){
+        return this.stored;
+    }
+
     public Beacon (Parcel in) {
         major = in.readInt();
         minor = in.readInt();
@@ -80,6 +94,9 @@ public class Beacon implements Parcelable{
         name = in.readString();
         uuid = in.readString();
         distance = in.readDouble();
+        boolean[] temparray = new boolean[1];
+        in.readBooleanArray(temparray);
+        stored = temparray[0];
     }
 
     @Override
@@ -91,6 +108,7 @@ public class Beacon implements Parcelable{
         out.writeString(name);
         out.writeString(uuid);
         out.writeDouble(distance);
+        out.writeBooleanArray(new boolean[]{stored});
     }
     @Override
     public int describeContents() {

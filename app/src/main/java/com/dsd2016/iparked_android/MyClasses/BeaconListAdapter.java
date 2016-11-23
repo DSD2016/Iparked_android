@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.dsd2016.iparked_android.R;
@@ -55,6 +56,7 @@ public class BeaconListAdapter extends BaseAdapter{
         TextView beaconUuid;
         TextView beaconNumbers;
         TextView beaconDistance;
+        ImageButton addBeacon, editBeacon, deleteBeacon;
     }
 
     @Override
@@ -68,6 +70,12 @@ public class BeaconListAdapter extends BaseAdapter{
             viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
             viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
             viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
+            viewHolder.addBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
+            viewHolder.addBeacon.setEnabled(false);
+            viewHolder.editBeacon = (ImageButton) view.findViewById(R.id.btn_edit_beacon);
+            viewHolder.editBeacon.setEnabled(false);
+            viewHolder.deleteBeacon = (ImageButton) view.findViewById(R.id.btn_delete_beacon);
+            viewHolder.deleteBeacon.setEnabled(false);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -83,6 +91,15 @@ public class BeaconListAdapter extends BaseAdapter{
         viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
         viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
         viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
+
+        if(beacon.getStored()){                                                     // Add button enabled only if beacon not stored
+            viewHolder.editBeacon.setEnabled(true);                                 // Mod and Del buttons enabled otherwise
+            viewHolder.deleteBeacon.setEnabled(true);
+        }else
+            viewHolder.addBeacon.setEnabled(true);
+
+
+
         return view;
     }
 
