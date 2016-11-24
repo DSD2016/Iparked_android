@@ -245,7 +245,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     }
 
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
 
