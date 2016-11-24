@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.Fragments;
+package com.dsd2016.iparked_android.fragments;
 
 
 import android.animation.Animator;
@@ -6,63 +6,43 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.DialogInterface;
-import android.content.IntentFilter;
-import android.support.v4.app.ListFragment;
-
 import android.content.Context;
-import android.content.Intent;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.ImageButton;
-
-import android.widget.ListView;
-
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
-import com.dsd2016.iparked_android.MyClasses.Beacon;
-import com.dsd2016.iparked_android.MyClasses.BeaconListAdapter;
-import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
-import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
-import com.dsd2016.iparked_android.MyClasses.ParcelableBeaconList;
+import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
+import com.dsd2016.iparked_android.myClasses.IparkedApp;
+import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
 import com.ogaclejapan.arclayout.ArcLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This fragment lists out nearby beacons in clickable list. When user clicks on certain beacon, he
- * is offered to add that beacon as personal. Nearby beacons are acquired by sending Broadcast.
- * Broadcast is received by BeaconProximityService which than sends beacons back through another
- * Broadcast.
- */
-public class MyPairingFragment extends ListFragment implements View.OnClickListener {
 
-    private static final String TAG = "PAIRING_FRAGMENT";
+public class MyAboutFragment extends Fragment implements View.OnClickListener {
+
+
+    private static final String TAG = "ABOUT_FRAGMENT";
     Toast toast = null;
     ClipRevealFrame menuLayout;
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
-    private ListView listView;
-    BeaconListAdapter beaconListAdapter;
-
-    private OnMenuItemSelectedListener mListener;
-
-
+    Button btn_insert,btn_read,btn_delete;
+    OnMenuItemSelectedListener mListener;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -74,180 +54,66 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
     }
 
-    public MyPairingFragment() {
-        // Required empty public constructor
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View myView=inflater.inflate(R.layout.fragment_pairing, container, false);
-        rootLayout = myView.findViewById(R.id.root_layout);
-
+        View myView=inflater.inflate(R.layout.fragment_about, container, false);
         menuLayout = (ClipRevealFrame) myView.findViewById(R.id.menu_layout);
+        rootLayout = myView.findViewById(R.id.root_layout);
         arcLayout = (ArcLayout) myView.findViewById(R.id.arc_layout);
         centerItem = myView.findViewById(R.id.center_item);
+        btn_insert=(Button)myView.findViewById(R.id.btn_insert);
+        btn_insert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Long t=IparkedApp.mDbHelper.Insert("Test1","vendortest","123","12","12",getContext());
+                Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        btn_read=(Button)myView.findViewById(R.id.btn_read);
+        btn_read.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Cursor c=IparkedApp.mDbHelper.Read();
+                c.moveToFirst();
+                int a=2;
+            }
+        });
+        btn_delete=(Button)myView.findViewById(R.id.btn_delete);
+        btn_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IparkedApp.mDbHelper.Delete("123123");
+            }
+        });
         centerItem.setOnClickListener(this);
         for (int i = 0, size = arcLayout.getChildCount(); i < size; i++) {
             arcLayout.getChildAt(i).setOnClickListener(this);
         }
-        myView.findViewById(R.id.scan_button).setOnClickListener(this);
+
         myView.findViewById(R.id.fab).setOnClickListener(this);
-
-        listView = (ListView) myView.findViewById(android.R.id.list);
-
-        beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater());
-
         return myView;
-    }
-
-    /**
-     * Every time fragment is resumed broadcast receiver is registered(It is unregistered
-     * in onPause method). And the list of beacons is cleared.
-     */
-    @Override
-    public void onResume() {
-
-        super.onResume();
-
-        getActivity().registerReceiver(this.broadCastNewMessage, new IntentFilter("HereAreSomeBeacons"));
-        beaconListAdapter.clear();
-        listView.setAdapter(beaconListAdapter);
 
     }
 
-    BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
-        /**
-         * This method is called by OS when new broadcast is received. Here we are extracting
-         * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
-         * @param context
-         * @param intent
-         */
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("bah",intent.getAction());
-            ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
-            ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
-            beaconListAdapter.clear();
-            beaconListAdapter.addAll(beaconList);
-            beaconListAdapter.notifyDataSetChanged();
-
-        }
-    };
-
-    /**
-     * Every time fragment is paused broadcast receiver is unregistered(It is unregistered
-     * in onResume method).
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-        getActivity().unregisterReceiver(broadCastNewMessage);
+    public static MyAboutFragment newInstance() {
+        return new MyAboutFragment();
     }
-
-
-    public static MyPairingFragment newInstance() {
-        return new MyPairingFragment();
+    public MyAboutFragment() {
     }
-
-    /**
-     * Method is every time something is clicked on the screen. If scan button is clicked Broadcast
-     * is sent requesting nearby beacons.
-     * @param v
-     */
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab) {
             onFabClick(v);
             return;
-        }else if(v.getId() == R.id.scan_button ){
-            getActivity().sendBroadcast(new Intent().setAction("gimmeSomeBeacons"));
         }
         if (v instanceof ImageButton) {
             switchfrag((ImageButton) v);
         }
     }
-
-    private void addBeacon(Beacon beacon){                                                       // Add beacon to Database
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to give a custom name to the beacon
-        builder.setTitle(R.string.inputdialogtitle);
-
-        final EditText input = new EditText(getContext());
-
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String name = input.getText().toString();
-                //add to the database
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-
-    }
-
-    private void editBeacon(Beacon beacon){                                         // Edit the selected beacon
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to modify the custom name
-        builder.setTitle(R.string.editdialogtitle);
-
-        final EditText input = new EditText(getContext());
-        // change the text to the name of the beacon
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String name = input.getText().toString();
-                //update to the database
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-    }
-
-    private void deleteBeacon(Beacon beacon){                                       // delete selected beacon from database
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to confirm deletion
-        builder.setTitle(R.string.editdialogtitle);
-
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                // delete the beacon from database
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-
-    }
-
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
-
     private void onFabClick(View v) {
         int x = (v.getLeft() + v.getRight()) / 2;
         int y = (v.getTop() + v.getBottom()) / 2;
@@ -387,5 +253,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
         return reveal;
     }
+
 
 }

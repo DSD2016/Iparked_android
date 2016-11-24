@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.Services;
+package com.dsd2016.iparked_android.services;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

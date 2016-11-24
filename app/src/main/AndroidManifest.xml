@@ -14,7 +14,7 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
-        android:name=".MyClasses.IparkedApp"
+        android:name=".myClasses.IparkedApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_iparked_logo"
         android:label="@string/app_name"
@@ -25,10 +25,13 @@
 
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCU1dQbp4oIs2_u6xl99umcUzECEpTB7KQ"/>
 
-        <activity android:name=".Activities.MainActivity">
+        <activity android:name=".activities.MainActivity">
+            <intent-filter>
+                <action android:name="com.dsd2016.iparked_android.return_beacons" />
+            </intent-filter>
         </activity>
 
-        <activity android:name=".Activities.SplashActivity">
+        <activity android:name=".activities.SplashActivity">
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,7 +40,7 @@
         </activity>
 
         <receiver
-            android:name=".Services.OnBootReceiver"
+            android:name=".services.OnBootReceiver"
             android:enabled="true"
             android:exported="false">
 
@@ -57,9 +60,13 @@
         </receiver>
 
         <service
-            android:name=".Services.BeaconProximityService"
+            android:name=".services.BeaconProximityService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="com.dsd2016.iparked_android.get_beacons" />
+            </intent-filter>
         </service>
 
     </application>

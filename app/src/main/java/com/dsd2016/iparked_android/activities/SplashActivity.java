@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.Activities;
+package com.dsd2016.iparked_android.activities;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -16,7 +16,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.R;
-import com.dsd2016.iparked_android.Services.BeaconProximityService;
+import com.dsd2016.iparked_android.services.BeaconProximityService;
 
 
 public class SplashActivity extends AppCompatActivity {

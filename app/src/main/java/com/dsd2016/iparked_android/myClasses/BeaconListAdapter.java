@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.MyClasses;
+package com.dsd2016.iparked_android.myClasses;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +26,7 @@ public class BeaconListAdapter extends BaseAdapter{
     }
 
     public void addAll(ArrayList<Beacon> beaconList) {
-        for (Beacon beacon:beaconList) {
+        for (Beacon beacon : beaconList) {
             this.beaconList.add(beacon);
         }
     }
@@ -88,7 +88,7 @@ public class BeaconListAdapter extends BaseAdapter{
         }else {
             viewHolder.beaconName.setText("Name: unknown");
         }
-        viewHolder.beaconUuid.setText("UUID:"+beacon.getUuid());
+        viewHolder.beaconUuid.setText("UUID:"+ beacon.getUuid());
         viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
         viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
 

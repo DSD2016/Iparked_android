@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.MyClasses;
+package com.dsd2016.iparked_android.myClasses;
 
 import android.Manifest;
 import android.app.Activity;
@@ -12,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 
-import com.dsd2016.iparked_android.Activities.MainActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;

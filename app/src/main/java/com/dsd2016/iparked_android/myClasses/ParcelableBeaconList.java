@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.MyClasses;
+package com.dsd2016.iparked_android.myClasses;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -21,7 +21,7 @@ public class ParcelableBeaconList implements Parcelable {
     }
 
     public ParcelableBeaconList (Parcel parcel) {
-        parcel.readTypedList(beaconList,Beacon.CREATOR);
+        parcel.readTypedList(beaconList, Beacon.CREATOR);
     }
 
     public List<Beacon> getbeaconList() {
