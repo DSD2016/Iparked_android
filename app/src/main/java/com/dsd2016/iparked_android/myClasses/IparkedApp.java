@@ -1,7 +1,6 @@
-package com.dsd2016.iparked_android.MyClasses;
+package com.dsd2016.iparked_android.myClasses;
 
 import android.app.Application;
-import android.content.Context;
 
 /**
  * Created by Saeedek on 22-Nov-16.

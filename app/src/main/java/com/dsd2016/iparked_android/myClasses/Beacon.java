@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.MyClasses;
+package com.dsd2016.iparked_android.myClasses;
 
 
 import android.os.Parcel;

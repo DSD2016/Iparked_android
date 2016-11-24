@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dsd2016.iparked_android.Fragments.MyAboutFragment"
+    tools:context="com.dsd2016.iparked_android.fragments.MyAboutFragment"
     android:id="@+id/root_layout">
 
 
@@ -59,7 +59,7 @@
 
     </android.support.design.widget.FloatingActionButton>
 
-    <com.dsd2016.iparked_android.MyClasses.ClipRevealFrame
+    <com.dsd2016.iparked_android.myClasses.ClipRevealFrame
         android:id="@+id/menu_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -113,6 +113,6 @@
             android:src="@drawable/find"
             android:tag="find" />
 
-    </com.dsd2016.iparked_android.MyClasses.ClipRevealFrame>
+    </com.dsd2016.iparked_android.myClasses.ClipRevealFrame>
 
 </FrameLayout>

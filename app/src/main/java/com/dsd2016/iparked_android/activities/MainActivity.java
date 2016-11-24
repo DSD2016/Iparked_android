@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.Activities;
+package com.dsd2016.iparked_android.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,11 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.Fragments.MyAboutFragment;
-import com.dsd2016.iparked_android.Fragments.MyMapFragment;
-import com.dsd2016.iparked_android.Fragments.MyPairingFragment;
-import com.dsd2016.iparked_android.Fragments.MySettingsFragment;
-import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
+import com.dsd2016.iparked_android.fragments.MyAboutFragment;
+import com.dsd2016.iparked_android.fragments.MyMapFragment;
+import com.dsd2016.iparked_android.fragments.MyPairingFragment;
+import com.dsd2016.iparked_android.fragments.MySettingsFragment;
+import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
 
 public class MainActivity extends AppCompatActivity implements OnMenuItemSelectedListener {
@@ -23,21 +23,21 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemSelecte
 
         if (findViewById(R.id.fragment_container) != null) {
 
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
+            /** However, if we're being restored from a previous state,
+            * then we don't need to do anything and should return or else
+            * we could end up with overlapping fragments. */
             if (savedInstanceState != null) {
                 return;
             }
 
-            // Create a new Fragment to be placed in the activity layout
+            /** Create a new Fragment to be placed in the activity layout */
             MyMapFragment firstFragment = new MyMapFragment();
 
-            // In case this activity was started with special instructions from an
-            // Intent, pass the Intent's extras to the fragment as arguments
+            /** In case this activity was started with special instructions from an
+            * Intent, pass the Intent's extras to the fragment as arguments */
             firstFragment.setArguments(getIntent().getExtras());
 
-            // Add the fragment to the 'fragment_container' FrameLayout
+            /** Add the fragment to the 'fragment_container' FrameLayout */
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, firstFragment).commit();
         }
@@ -50,33 +50,33 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemSelecte
             case "about":
                 MyAboutFragment aboutfragment = new MyAboutFragment();
 
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
+                /** In case this activity was started with special instructions from an
+                * Intent, pass the Intent's extras to the fragment as arguments */
                 aboutfragment.setArguments(getIntent().getExtras());
 
-                // Add the fragment to the 'fragment_container' FrameLayout
+                /** Add the fragment to the 'fragment_container' FrameLayout */
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, aboutfragment).commit();
                 break;
             case "find":
                 MyMapFragment mapfragment = new MyMapFragment();
 
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
+                /** In case this activity was started with special instructions from an
+                * Intent, pass the Intent's extras to the fragment as arguments */
                 mapfragment.setArguments(getIntent().getExtras());
 
-                // Add the fragment to the 'fragment_container' FrameLayout
+                /** Add the fragment to the 'fragment_container' FrameLayout */
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, mapfragment).commit();
                 break;
             case "settings":
                 MySettingsFragment settingsfragment = new MySettingsFragment();
 
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
+                /** In case this activity was started with special instructions from an
+                * Intent, pass the Intent's extras to the fragment as arguments */
                 settingsfragment.setArguments(getIntent().getExtras());
 
-                // Add the fragment to the 'fragment_container' FrameLayout
+                /** Add the fragment to the 'fragment_container' FrameLayout */
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, settingsfragment).commit();
 
@@ -84,11 +84,11 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemSelecte
             case "pair":
                 MyPairingFragment pairingfragment = new MyPairingFragment();
 
-                // In case this activity was started with special instructions from an
-                // Intent, pass the Intent's extras to the fragment as arguments
+                /** In case this activity was started with special instructions from an
+                * Intent, pass the Intent's extras to the fragment as arguments */
                 pairingfragment.setArguments(getIntent().getExtras());
 
-                // Add the fragment to the 'fragment_container' FrameLayout
+                /** Add the fragment to the 'fragment_container' FrameLayout */
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, pairingfragment).commit();
 
@@ -98,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements OnMenuItemSelecte
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-// Check for the integer request code originally supplied to startResolutionForResult().
+
+            /** Check for the integer request code originally supplied to startResolutionForResult(). */
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:

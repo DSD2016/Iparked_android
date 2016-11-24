@@ -1,16 +1,25 @@
-package com.dsd2016.iparked_android.Fragments;
+package com.dsd2016.iparked_android.fragments;
 
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -20,42 +29,89 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.MyClasses.AnimatorUtils;
-import com.dsd2016.iparked_android.MyClasses.ClipRevealFrame;
-import com.dsd2016.iparked_android.MyClasses.OnMenuItemSelectedListener;
+import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
+import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
+import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
+import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
-import com.github.machinarius.preferencefragment.PreferenceFragment;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.ogaclejapan.arclayout.ArcLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class MySettingsFragment extends PreferenceFragment implements View.OnClickListener {
-
-    private static final String TAG = "SETTINGS_FRAGMENT";
+public class MyMapFragment extends Fragment implements View.OnClickListener, OnMapReadyCallback, OnGotLastLocation {
+    private static final String TAG = "MAP_FRAGMENT";
     Toast toast = null;
     ClipRevealFrame menuLayout;
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
+    View myView;
+
     OnMenuItemSelectedListener mListener;
-    private ListPreference mListPreference;
+    protected MapView mapView;
+    protected GoogleMap googleMap, map;
+    MyLocationProvider myLocationProvider;
+    final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.settings);
+
     }
-    public MySettingsFragment() {
-        // Required empty public constructor
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mapView != null) {
+            mapView.onResume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mapView != null) {
+            try {
+                mapView.onDestroy();
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Error while attempting MapView.onDestroy(), ignoring exception", e);
+            }
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mapView != null) {
+            mapView.onLowMemory();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mapView != null) {
+            mapView.onSaveInstanceState(outState);
+        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Activity activity=(Activity)context;
+        Activity activity = (Activity) context;
         try {
             mListener = (OnMenuItemSelectedListener) activity;
         } catch (ClassCastException e) {
@@ -67,8 +123,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        View myView=inflater.inflate(R.layout.fragment_settings, container, false);
+        myView = inflater.inflate(R.layout.fragment_map, container, false);
         menuLayout = (ClipRevealFrame) myView.findViewById(R.id.menu_layout);
         rootLayout = myView.findViewById(R.id.root_layout);
         arcLayout = (ArcLayout) myView.findViewById(R.id.arc_layout);
@@ -79,12 +134,21 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         }
 
         myView.findViewById(R.id.fab).setOnClickListener(this);
+        mapView = (MapView) myView.findViewById(R.id.mapview);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
         return myView;
 
     }
-    public static MySettingsFragment newInstance() {
-        return new MySettingsFragment();
+
+    public static MyMapFragment newInstance() {
+        return new MyMapFragment();
     }
+
+    public MyMapFragment() {
+    }
+
+
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab) {
@@ -95,10 +159,11 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
             switchfrag((ImageButton) v);
         }
     }
+
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
+
     private void onFabClick(View v) {
         int x = (v.getLeft() + v.getRight()) / 2;
         int y = (v.getTop() + v.getBottom()) / 2;
@@ -114,6 +179,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         }
         v.setSelected(!v.isSelected());
     }
+
     private void showMenu(int cx, int cy, float startRadius, float endRadius) {
         menuLayout.setVisibility(View.VISIBLE);
 
@@ -133,6 +199,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         animSet.playSequentially(animList);
         animSet.start();
     }
+
     private void hideMenu(int cx, int cy, float startRadius, float endRadius) {
         List<Animator> animList = new ArrayList<>();
 
@@ -160,6 +227,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         animSet.start();
 
     }
+
     private Animator createShowItemAnimator(View item) {
         float dx = centerItem.getX() - item.getX();
         float dy = centerItem.getY() - item.getY();
@@ -181,6 +249,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         anim.setDuration(50);
         return anim;
     }
+
     private Animator createHideItemAnimator(final View item) {
         final float dx = centerItem.getX() - item.getX();
         final float dy = centerItem.getY() - item.getY();
@@ -205,6 +274,7 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         anim.setDuration(50);
         return anim;
     }
+
     private Animator createCircularReveal(final ClipRevealFrame view, int x, int y, float startRadius,
                                           float endRadius) {
         final Animator reveal;
@@ -239,4 +309,84 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         return reveal;
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        int hasLocationPermission = ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION);
+        if (hasLocationPermission != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                showMessageOKCancel("You need to allow access to Location",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        REQUEST_CODE_ASK_PERMISSIONS);
+                            }
+                        });
+                return;
+            }
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE_ASK_PERMISSIONS);
+            return;
+        }
+        modifyMap(googleMap);
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(this.getContext())
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    private void modifyMap(GoogleMap googleMap) {
+        map = googleMap;
+        map.getUiSettings().setMapToolbarEnabled(true);
+        MapsInitializer.initialize(this.getContext());
+        myLocationProvider = new MyLocationProvider(getContext(), this);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    modifyMap(googleMap);
+                } else {
+                    // Permission Denied
+                    Toast.makeText(this.getContext(), "Location Access Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    public void onGotLastLocation(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude() + 0.005);
+        LatLng fer_parking = new LatLng(45.800617, 15.971309);
+        Bitmap bm=BitmapFactory.decodeResource(getResources(),R.drawable.iparked_garage_fer);
+
+        GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
+                .position(fer_parking, 256f, 512f);
+        map.addGroundOverlay(ferParkingMap);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 15);
+        map.animateCamera(cameraUpdate);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }
+        map.setMyLocationEnabled(true);
+        map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 12/11/2016 12:12:12"));
+        map.addMarker(new MarkerOptions().position(fer_parking).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 15/11/2016 10:25:32"));
+    }
+    public void CheckContinue(){
+        myLocationProvider.Continue();
+    }
 }

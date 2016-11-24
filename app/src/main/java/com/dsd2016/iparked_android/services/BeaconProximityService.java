@@ -1,4 +1,4 @@
-package com.dsd2016.iparked_android.Services;
+package com.dsd2016.iparked_android.services;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -9,7 +9,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.dsd2016.iparked_android.MyClasses.Beacon;
+import com.dsd2016.iparked_android.activities.MainActivity;
+import com.dsd2016.iparked_android.myClasses.Beacon;
 
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -19,12 +20,11 @@ import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 
 public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier {
 
-    private List<Beacon> beaconList;
+    private ArrayList<Beacon> beaconList;
     private BeaconManager beaconManager;
 
     public BeaconProximityService() {
@@ -40,7 +40,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         beaconList = new ArrayList<>();
 
         /** Register intents */
-        registerReceiver(getBeacons, new IntentFilter("com.dsd2016.iparked_android.get_service_beacons"));
+        registerReceiver(getBeacons, new IntentFilter("com.dsd2016.iparked_android.get_beacons"));
 
         /** Register beacon monitoring */
         beaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
@@ -72,7 +72,9 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("iParkedId", null, null, null));
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            Log.v("iParked", "Remote exception");
+        }
 
     }
 
@@ -88,13 +90,19 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
             Beacon visible = new Beacon(uuid, major, minor, distance);
             beaconList.add(visible);
+
         }
     }
 
 
     public void returnNearbyBeacons() {
+
         /** Broadcasts intent containing the list of nearby beacons */
-        Log.v("iParked", "Return beacons");
+        Intent returnBeacons = new Intent(getApplicationContext(), MainActivity.class);
+        returnBeacons.setAction("com.dsd2016.iparked_android.return_beacons");
+        returnBeacons.putParcelableArrayListExtra("BeaconList", beaconList);
+        sendBroadcast(returnBeacons);
+
     }
 
 
@@ -105,7 +113,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals("com.dsd2016.iparked_android.get_service_beacons")) {
+            if (action.equals("com.dsd2016.iparked_android.get_beacons")) {
                 returnNearbyBeacons();
             }
         }
