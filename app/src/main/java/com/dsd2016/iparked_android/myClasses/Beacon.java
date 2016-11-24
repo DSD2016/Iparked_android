@@ -12,7 +12,8 @@ public class Beacon implements Parcelable{
     private int rssi;
     private String name;
     private double distance;
-    private boolean stored;                                                                         // true if beacon stored in database
+    private boolean stored; // true if beacon is stored in database
+    private String uuid;
 
     public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid) {
         this.major = major;
@@ -50,7 +51,7 @@ public class Beacon implements Parcelable{
         stored = temparray[0];
     }
 
-    private String uuid;
+
 
     public int getMajor() {
         return major;

@@ -81,14 +81,16 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
     @Override
     public void didRangeBeaconsInRegion(Collection<org.altbeacon.beacon.Beacon> collection, Region region) {
+        beaconList.clear();
         for (org.altbeacon.beacon.Beacon beacon : collection) {
 
             String uuid = beacon.getId1().toString();
             int major = beacon.getId2().toInt();
             int minor = beacon.getId3().toInt();
+            String name = beacon.getBluetoothName();
             double distance = beacon.getDistance();
 
-            Beacon visible = new Beacon(uuid, major, minor, distance);
+            Beacon visible = new Beacon(major,minor,beacon.getTxPower(),beacon.getRssi(),name,uuid);
             beaconList.add(visible);
 
         }
@@ -98,10 +100,10 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     public void returnNearbyBeacons() {
 
         /** Broadcasts intent containing the list of nearby beacons */
-        Intent returnBeacons = new Intent(getApplicationContext(), MainActivity.class);
-        returnBeacons.setAction("com.dsd2016.iparked_android.return_beacons");
-        returnBeacons.putParcelableArrayListExtra("BeaconList", beaconList);
-        sendBroadcast(returnBeacons);
+        Intent test=new Intent("com.dsd2016.iparked_android.return_beacons");
+        test.putParcelableArrayListExtra("BeaconList",beaconList);
+        sendBroadcast(test);
+
 
     }
 

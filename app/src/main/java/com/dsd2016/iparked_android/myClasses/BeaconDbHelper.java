@@ -17,10 +17,10 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + BeaconDatabaseSchema.Beacons.TABLE_NAME + " (" +
                     BeaconDatabaseSchema.Beacons._ID + " INTEGER PRIMARY KEY," +
                     BeaconDatabaseSchema.Beacons.COLUMN_NAME + TEXT_TYPE + COMMA_SEP +
-                    BeaconDatabaseSchema.Beacons.COLUMN_MINOR + TEXT_TYPE + COMMA_SEP +
+                    BeaconDatabaseSchema.Beacons.COLUMN_MINOR + " INTEGER" + COMMA_SEP +
                     BeaconDatabaseSchema.Beacons.COLUMN_UUID + TEXT_TYPE + COMMA_SEP +
-                    BeaconDatabaseSchema.Beacons.COLUMN_MAJOR + TEXT_TYPE + COMMA_SEP +
-                    BeaconDatabaseSchema.Beacons.COLUMN_STORED + TEXT_TYPE + " )";
+                    BeaconDatabaseSchema.Beacons.COLUMN_MAJOR + " INTEGER" + COMMA_SEP +
+                    BeaconDatabaseSchema.Beacons.COLUMN_STORED + " INTEGER" + " )";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + BeaconDatabaseSchema.Beacons.TABLE_NAME;
@@ -46,7 +46,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public long Insert(String name,String major,String minor,String uuid){
+    public long Insert(String name,int major,int minor,String uuid){
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -55,7 +55,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_MINOR, minor);
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_UUID, uuid);
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_MAJOR, major);
-        values.put(BeaconDatabaseSchema.Beacons.COLUMN_STORED, "true");
+        values.put(BeaconDatabaseSchema.Beacons.COLUMN_STORED, 1);
 
         long newRowId = db.insert(BeaconDatabaseSchema.Beacons.TABLE_NAME, null, values);
         return newRowId;

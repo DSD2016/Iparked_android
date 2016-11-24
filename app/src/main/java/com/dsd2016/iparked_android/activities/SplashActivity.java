@@ -18,6 +18,8 @@ import android.widget.Toast;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.services.BeaconProximityService;
 
+import java.util.List;
+
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -79,15 +81,19 @@ public class SplashActivity extends AppCompatActivity {
 
     private void startProximityService() {
 
+        int serviceStarted = 0;
         /** Start proximity service if it already isn't active */
         ActivityManager manager = (ActivityManager) getSystemService(this.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (BeaconProximityService.class.getName().equals(service.service.getClassName())) {
-
-                this.startService(new Intent(this, BeaconProximityService.class));
-
+                serviceStarted = 1;
+                break;
             }
         }
+        if(serviceStarted==0){
+            this.startService(new Intent(this, BeaconProximityService.class));
+        }
+
 
     }
 
