@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 
 import android.content.Context;
@@ -33,8 +35,10 @@ import android.widget.Toast;
 
 import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.dsd2016.iparked_android.myClasses.BeaconDatabaseSchema;
 import com.dsd2016.iparked_android.myClasses.BeaconListAdapter;
 import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
+import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.myClasses.ParcelableBeaconList;
 import com.dsd2016.iparked_android.R;
@@ -128,16 +132,24 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
 
             Log.v("iParked", "Return beacons");
-
-            ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
-            ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
+            ArrayList<Beacon> beaconList = intent.getParcelableArrayListExtra("BeaconList");
+           // ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
+           // ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
 
             beaconListAdapter.clear();
+            addStoredBeacon();
             beaconListAdapter.addAll(beaconList);
             beaconListAdapter.notifyDataSetChanged();
 
         }
     };
+
+    private void addStoredBeacon() {
+        ArrayList<Beacon> storedBeaconList=new ArrayList<Beacon>(1);
+        Cursor c = IparkedApp.mDbHelper.Read();
+        for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+        }
+    }
 
     /**
      * Every time fragment is paused broadcast receiver is unregistered(It is unregistered
@@ -245,7 +257,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     }
 
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
 

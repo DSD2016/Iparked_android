@@ -96,7 +96,6 @@ public class MySettingsFragment extends PreferenceFragment implements View.OnCli
         }
     }
     private void switchfrag(ImageButton btn) {
-        this.onClick(getView().findViewById(R.id.fab));
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
     private void onFabClick(View v) {
