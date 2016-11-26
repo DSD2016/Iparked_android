@@ -12,7 +12,7 @@ public class Beacon implements Parcelable{
     private int rssi;
     private String name;
     private double distance;
-    private boolean stored; // true if beacon is stored in database
+    private int stored; // 1 if beacon is stored in database
     private String uuid;
 
     public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid) {
@@ -23,11 +23,11 @@ public class Beacon implements Parcelable{
         this.name = name;
         this.uuid = uuid;
         setDistance(txPower, rssi);
-        this.stored = false;
+        this.stored = 0;
     }
 
-    public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid, boolean stored) { // Beacon creator with stored variable
-        this(major, minor, txPower, rssi, name, uuid);
+    public Beacon(String name,int major, int minor,String uuid, int stored) { // Beacon creator with stored variable
+        this(name,major, minor, uuid);
         this.stored = stored;
     }
 
@@ -36,6 +36,12 @@ public class Beacon implements Parcelable{
         this.major = major;
         this.minor = minor;
         this.distance = distance;
+    }
+    public Beacon(String name, int major, int minor,String uuid) {
+        this.uuid = uuid;
+        this.major = major;
+        this.minor = minor;
+        this.name = name;
     }
 
     public Beacon(Parcel in) {
@@ -46,9 +52,7 @@ public class Beacon implements Parcelable{
         name = in.readString();
         uuid = in.readString();
         distance = in.readDouble();
-        boolean[] temparray = new boolean[1];
-        in.readBooleanArray(temparray);
-        stored = temparray[0];
+        stored = in.readInt();
     }
 
 
@@ -84,11 +88,11 @@ public class Beacon implements Parcelable{
         this.distance = Math.pow(ratio, 10);
     }
 
-    public void setStored(boolean stored){
+    public void setStored(int stored){
         this.stored = stored;
     }
 
-    public boolean getStored(){
+    public int getStored(){
         return this.stored;
     }
 
@@ -101,7 +105,7 @@ public class Beacon implements Parcelable{
         out.writeString(name);
         out.writeString(uuid);
         out.writeDouble(distance);
-        out.writeBooleanArray(new boolean[]{stored});
+        out.writeInt(stored);
     }
     @Override
     public int describeContents() {

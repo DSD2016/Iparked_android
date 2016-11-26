@@ -82,7 +82,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         );
         return c;
     }
-    public void Delete(String uuid){
+    public Boolean Delete(String uuid){
         SQLiteDatabase db = this.getWritableDatabase();
 
 
@@ -90,7 +90,13 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
 
         String[] selectionArgs = { uuid };
 
-        db.delete(BeaconDatabaseSchema.Beacons.TABLE_NAME, selection, selectionArgs);
+        int delete = db.delete(BeaconDatabaseSchema.Beacons.TABLE_NAME, selection, selectionArgs);
+        if(delete==0){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
     public Boolean Update(String newname,String uuid){
 

@@ -5,19 +5,25 @@
     android:layout_height="match_parent"
     tools:context="com.dsd2016.iparked_android.fragments.MyPairingFragment"
     android:id="@+id/root_layout">
-
-    <ListView
-        android:id="@android:id/list"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="409dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="50" />
 
 
-    <Button
-        android:text="@string/scan_button_string"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:id="@+id/scan_button" />
+        <Button
+            android:text="@string/scan_button_string"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom|left"
+            android:id="@+id/scan_button" />
+    </LinearLayout>
+
 
     <android.support.design.widget.FloatingActionButton
         android:layout_height="80dp"

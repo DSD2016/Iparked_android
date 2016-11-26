@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.dsd2016.iparked_android.activities.MainActivity;
 import com.dsd2016.iparked_android.myClasses.Beacon;
 
 import org.altbeacon.beacon.BeaconConsumer;

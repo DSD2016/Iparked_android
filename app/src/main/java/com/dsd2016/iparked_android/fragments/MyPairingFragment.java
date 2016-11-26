@@ -63,6 +63,9 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     View rootLayout;
     private ListView listView;
     BeaconListAdapter beaconListAdapter;
+    private ArrayList<Beacon> storedbeaconList = new ArrayList<Beacon>(1);
+    private ArrayList<Beacon> visiblebeaconList = new ArrayList<Beacon>(1);
+    private ArrayList<Beacon> allbeaconList = new ArrayList<Beacon>(1);
 
     private OnMenuItemSelectedListener mListener;
 
@@ -101,7 +104,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
 
         listView = (ListView) myView.findViewById(android.R.id.list);
 
-        beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater());
+        beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater(),this);
 
         return myView;
     }
@@ -116,9 +119,19 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         super.onResume();
 
         getActivity().registerReceiver(broadCastNewMessage, new IntentFilter("com.dsd2016.iparked_android.return_beacons"));
-        beaconListAdapter.clear();
         listView.setAdapter(beaconListAdapter);
+        populateListView();
 
+    }
+
+    private void populateListView() {
+        beaconListAdapter.clear();
+        addStoredBeacon();
+        //allbeaconList.addAll(storedbeaconList);
+        //allbeaconList.addAll(visiblebeaconList);
+        beaconListAdapter.addAll(storedbeaconList);
+        beaconListAdapter.addAll(visiblebeaconList);
+        beaconListAdapter.notifyDataSetChanged();
     }
 
     private BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
@@ -132,22 +145,33 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
 
             Log.v("iParked", "Return beacons");
-            ArrayList<Beacon> beaconList = intent.getParcelableArrayListExtra("BeaconList");
+            visiblebeaconList.clear();
+            visiblebeaconList = intent.getParcelableArrayListExtra("BeaconList");
            // ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
            // ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
 
-            beaconListAdapter.clear();
-            addStoredBeacon();
-            beaconListAdapter.addAll(beaconList);
-            beaconListAdapter.notifyDataSetChanged();
+            populateListView();
 
         }
     };
 
     private void addStoredBeacon() {
-        ArrayList<Beacon> storedBeaconList=new ArrayList<Beacon>(1);
+        storedbeaconList.clear();
         Cursor c = IparkedApp.mDbHelper.Read();
+        String name,uuid;
+        int major,minor,stored;
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+            name = c.getString(
+                    c.getColumnIndexOrThrow(BeaconDatabaseSchema.Beacons.COLUMN_NAME));
+            uuid = c.getString(
+                    c.getColumnIndexOrThrow(BeaconDatabaseSchema.Beacons.COLUMN_UUID));
+            major = c.getInt(
+                    c.getColumnIndexOrThrow(BeaconDatabaseSchema.Beacons.COLUMN_MAJOR));
+            minor = c.getInt(
+                    c.getColumnIndexOrThrow(BeaconDatabaseSchema.Beacons.COLUMN_MINOR));
+            stored = c.getInt(
+                    c.getColumnIndexOrThrow(BeaconDatabaseSchema.Beacons.COLUMN_STORED));
+            storedbeaconList.add(new Beacon(name,major,minor,uuid,stored));
         }
     }
 
@@ -173,28 +197,39 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
      */
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.fab) {
-            onFabClick(v);
-        } else if(v.getId() == R.id.scan_button ){
-            getActivity().sendBroadcast(new Intent().setAction("com.dsd2016.iparked_android.get_beacons"));
-        } else if (v instanceof ImageButton) {
-            switchfrag((ImageButton) v);
+        switch (v.getId()) {
+            case R.id.fab:
+                onFabClick(v);
+                break;
+            case R.id.scan_button:
+                getActivity().sendBroadcast(new Intent().setAction("com.dsd2016.iparked_android.get_beacons"));
+                break;
+            default:
+                switchfrag((ImageButton) v);
+                break;
         }
     }
 
-    private void addBeacon(Beacon beacon){                                                       // Add beacon to Database
+    public void addBeacon(final Beacon beacon){                                                       // Add beacon to Database
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to give a custom name to the beacon
-        builder.setTitle(R.string.inputdialogtitle);
+        builder.setTitle("Enter a name for this Beacon");
 
         final EditText input = new EditText(getContext());
-
+        input.setText(beacon.getName());
         builder.setView(input);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                //add to the database
+                long insert = IparkedApp.mDbHelper.Insert(name, beacon.getMajor(), beacon.getMinor(), beacon.getUuid());
+                if(insert!=-1){
+                    Toast.makeText(getContext(), "Beacon Successfully Saved", Toast.LENGTH_SHORT).show();
+                    populateListView();
+                }
+                else{
+                    Toast.makeText(getContext(), "Error during saving", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -205,22 +240,28 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         });
 
         builder.show();
-
     }
 
-    private void editBeacon(Beacon beacon){                                         // Edit the selected beacon
+    public void editBeacon(final Beacon beacon){                                         // Edit the selected beacon
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to modify the custom name
-        builder.setTitle(R.string.editdialogtitle);
+        builder.setMessage("Edit the Beacon Name");
 
         final EditText input = new EditText(getContext());
-        // change the text to the name of the beacon
+        input.setText(beacon.getName());
         builder.setView(input);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                //update to the database
+                Boolean update = IparkedApp.mDbHelper.Update(name, beacon.getUuid());
+                if(update){
+                    Toast.makeText(getContext(), "Beacon Successfully Updated", Toast.LENGTH_SHORT).show();
+                    populateListView();
+                }
+                else{
+                    Toast.makeText(getContext(), "Error during updating", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -231,21 +272,29 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         });
 
         builder.show();
+        beaconListAdapter.notifyDataSetChanged();
     }
 
-    private void deleteBeacon(Beacon beacon){                                       // delete selected beacon from database
+    public void deleteBeacon(final Beacon beacon){                                       // delete selected beacon from database
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());        // shows a dialog to confirm deletion
-        builder.setTitle(R.string.editdialogtitle);
+        builder.setTitle("Are you sure to delete this Beacon?");
 
 
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                // delete the beacon from database
+                Boolean delete = IparkedApp.mDbHelper.Delete(beacon.getUuid());
+                if(delete){
+                    Toast.makeText(getContext(), "Beacon Successfully Deleted", Toast.LENGTH_SHORT).show();
+                    populateListView();
+                }
+                else{
+                    Toast.makeText(getContext(), "Error during deleting", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
