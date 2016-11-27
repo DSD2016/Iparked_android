@@ -59,7 +59,7 @@ public class BeaconListAdapter extends BaseAdapter{
         TextView beaconUuid;
         TextView beaconNumbers;
         TextView beaconDistance;
-        ImageButton addBeacon, editBeacon, deleteBeacon;
+        ImageButton adddelBeacon, editBeacon;
     }
 
     @Override
@@ -74,30 +74,28 @@ public class BeaconListAdapter extends BaseAdapter{
             viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
             viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
             viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
-            viewHolder.addBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
-            viewHolder.addBeacon.setEnabled(false);
-            viewHolder.addBeacon.setOnClickListener(new View.OnClickListener() {
+            viewHolder.adddelBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
+            viewHolder.adddelBeacon.setEnabled(false);
+            viewHolder.adddelBeacon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    fragment.addBeacon(beaconList.get(index));
+                    if(view.getTag().toString().equals("delete")){
+                        fragment.deleteBeacon(beaconList.get(index));
+                    }
+                    else{
+                        fragment.addBeacon(beaconList.get(index));
+                    }
                 }
             });
             viewHolder.editBeacon = (ImageButton) view.findViewById(R.id.btn_edit_beacon);
-            viewHolder.editBeacon.setEnabled(false);
+            viewHolder.editBeacon.setVisibility(View.INVISIBLE);
             viewHolder.editBeacon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     fragment.editBeacon(beaconList.get(index));
                 }
             });
-            viewHolder.deleteBeacon = (ImageButton) view.findViewById(R.id.btn_delete_beacon);
-            viewHolder.deleteBeacon.setEnabled(false);
-            viewHolder.deleteBeacon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    fragment.deleteBeacon(beaconList.get(index));
-                }
-            });
+
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -115,13 +113,10 @@ public class BeaconListAdapter extends BaseAdapter{
         viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
 
         if(beacon.getStored()==1){                                                     // Add button enabled only if beacon not stored
-            viewHolder.editBeacon.setEnabled(true);                                 // Mod and Del buttons enabled otherwise
-            viewHolder.deleteBeacon.setEnabled(true);
+            viewHolder.editBeacon.setVisibility(View.VISIBLE);
+            viewHolder.adddelBeacon.setImageResource(R.drawable.b_del);
         }else
-            viewHolder.addBeacon.setEnabled(true);
-
-
-
+            viewHolder.adddelBeacon.setImageResource(R.drawable.b_add);
         return view;
     }
 

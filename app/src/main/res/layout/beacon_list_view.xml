@@ -51,11 +51,5 @@
             android:id="@+id/btn_edit_beacon"
             android:layout_weight="1" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/b_del"
-            android:id="@+id/btn_delete_beacon"
-            android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>

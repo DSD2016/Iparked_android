@@ -127,8 +127,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     private void populateListView() {
         beaconListAdapter.clear();
         addStoredBeacon();
-        //allbeaconList.addAll(storedbeaconList);
-        //allbeaconList.addAll(visiblebeaconList);
         beaconListAdapter.addAll(storedbeaconList);
         beaconListAdapter.addAll(visiblebeaconList);
         beaconListAdapter.notifyDataSetChanged();
@@ -176,7 +174,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     }
 
     /**
-     * Every time fragment is paused broadcast receiver is unregistered(It is unregistered
+     * Every time fragment is paused broadcast receiver is unregistered(It is registered
      * in onResume method).
      */
     @Override
@@ -191,7 +189,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     }
 
     /**
-     * Method is every time something is clicked on the screen. If scan button is clicked Broadcast
+     * Method is called every time something is clicked on the screen. If scan button is clicked Broadcast
      * is sent requesting nearby beacons.
      * @param v
      */
@@ -448,5 +446,4 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         }
         return reveal;
     }
-
 }
