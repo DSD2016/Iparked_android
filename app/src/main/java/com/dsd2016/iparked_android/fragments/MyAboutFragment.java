@@ -6,11 +6,16 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -41,7 +46,7 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
     ArcLayout arcLayout;
     View centerItem;
     View rootLayout;
-    Button btn_insert,btn_read,btn_delete;
+    Button btn_insert,btn_location;
     OnMenuItemSelectedListener mListener;
     @Override
     public void onAttach(Context context) {
@@ -53,7 +58,13 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
             throw new ClassCastException(activity.toString() + " must implement OnMenuItemSelectedListener");
         }
     }
+    @Override
+    public void onResume() {
 
+        super.onResume();
+        /** FOR TESTING,Registering the broadcast receiver of the location, */
+        getActivity().registerReceiver(broadCastNewMessage, new IntentFilter("com.dsd2016.iparked_android.return_location"));
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -62,6 +73,7 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
         rootLayout = myView.findViewById(R.id.root_layout);
         arcLayout = (ArcLayout) myView.findViewById(R.id.arc_layout);
         centerItem = myView.findViewById(R.id.center_item);
+        /** FOR TESTING,Inserting dummy info to the db */
         btn_insert=(Button)myView.findViewById(R.id.btn_insert);
         btn_insert.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,21 +88,18 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        btn_read=(Button)myView.findViewById(R.id.btn_read);
-        btn_read.setOnClickListener(new View.OnClickListener() {
+        /** FOR TESTING,getting the location. */
+
+        btn_location=(Button)myView.findViewById(R.id.btn_location);
+        btn_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Cursor c=IparkedApp.mDbHelper.Read();
-                c.moveToFirst();
+                getActivity().sendBroadcast(new Intent().setAction("com.dsd2016.iparked_android.get_location"));
+
             }
         });
-        btn_delete=(Button)myView.findViewById(R.id.btn_delete);
-        btn_delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                IparkedApp.mDbHelper.Delete("123123");
-            }
-        });
+        /** Building the menu */
+
         centerItem.setOnClickListener(this);
         for (int i = 0, size = arcLayout.getChildCount(); i < size; i++) {
             arcLayout.getChildAt(i).setOnClickListener(this);
@@ -100,7 +109,25 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
         return myView;
 
     }
+    /** FOR TESTING,Receiving the location */
 
+    private BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
+        /**
+         * This method is called by OS when new broadcast is received. Here we are extracting
+         * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
+         * @param context
+         * @param intent
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.v("iParked", "Return beacons");
+
+            Location mylocation = intent.getExtras().getParcelable("location");
+            Toast.makeText(context,String.valueOf(mylocation.getLatitude()), Toast.LENGTH_SHORT).show();
+
+        }
+    };
     public static MyAboutFragment newInstance() {
         return new MyAboutFragment();
     }
@@ -116,9 +143,17 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
             switchfrag((ImageButton) v);
         }
     }
+    /** Method for notifying the container to change the fragment */
+
     private void switchfrag(ImageButton btn) {
         mListener.onMenuItemSelected(btn.getTag().toString());
     }
+
+
+
+
+    /** Menu Precedures */
+
     private void onFabClick(View v) {
         int x = (v.getLeft() + v.getRight()) / 2;
         int y = (v.getTop() + v.getBottom()) / 2;

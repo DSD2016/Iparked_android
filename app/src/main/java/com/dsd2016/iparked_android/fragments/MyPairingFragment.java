@@ -56,7 +56,6 @@ import java.util.List;
 public class MyPairingFragment extends ListFragment implements View.OnClickListener {
 
     private static final String TAG = "PAIRING_FRAGMENT";
-    Toast toast = null;
     ClipRevealFrame menuLayout;
     ArcLayout arcLayout;
     View centerItem;
@@ -65,7 +64,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     BeaconListAdapter beaconListAdapter;
     private ArrayList<Beacon> storedbeaconList = new ArrayList<Beacon>(1);
     private ArrayList<Beacon> visiblebeaconList = new ArrayList<Beacon>(1);
-    private ArrayList<Beacon> allbeaconList = new ArrayList<Beacon>(1);
 
     private OnMenuItemSelectedListener mListener;
 
