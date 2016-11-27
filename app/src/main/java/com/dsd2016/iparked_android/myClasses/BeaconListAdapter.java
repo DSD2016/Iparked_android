@@ -59,6 +59,7 @@ public class BeaconListAdapter extends BaseAdapter{
         TextView beaconUuid;
         TextView beaconNumbers;
         TextView beaconDistance;
+        TextView beaconAddress;
         ImageButton adddelBeacon, editBeacon;
     }
 
@@ -74,8 +75,8 @@ public class BeaconListAdapter extends BaseAdapter{
             viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
             viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
             viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
+            viewHolder.beaconAddress = (TextView) view.findViewById(R.id.beacon_address);
             viewHolder.adddelBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
-            viewHolder.adddelBeacon.setEnabled(false);
             viewHolder.adddelBeacon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -111,12 +112,17 @@ public class BeaconListAdapter extends BaseAdapter{
         viewHolder.beaconUuid.setText("UUID:"+ beacon.getUuid());
         viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
         viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
-
+        viewHolder.beaconAddress.setText("Address: " + beacon.getAddress());
         if(beacon.getStored()==1){                                                     // Add button enabled only if beacon not stored
             viewHolder.editBeacon.setVisibility(View.VISIBLE);
             viewHolder.adddelBeacon.setImageResource(R.drawable.b_del);
-        }else
+            viewHolder.adddelBeacon.setTag("delete");
+        }else{
+            viewHolder.editBeacon.setVisibility(View.INVISIBLE);
             viewHolder.adddelBeacon.setImageResource(R.drawable.b_add);
+            viewHolder.adddelBeacon.setTag("add");
+        }
+
         return view;
     }
 

@@ -15,6 +15,7 @@ public final class BeaconDatabaseSchema {
         public static final String COLUMN_MINOR = "minor";
         public static final String COLUMN_UUID = "uuid";
         public static final String COLUMN_MAJOR = "major";
+        public static final String COLUMN_ADDRESS = "address";
         public static final String COLUMN_STORED = "stored";
     }
 

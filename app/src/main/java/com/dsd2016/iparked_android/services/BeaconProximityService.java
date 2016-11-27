@@ -112,8 +112,8 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             int minor = beacon.getId3().toInt();
             String name = beacon.getBluetoothName();
             double distance = beacon.getDistance();
-
-            Beacon visible = new Beacon(major, minor, beacon.getTxPower(), beacon.getRssi(), name, uuid);
+            String address = beacon.getBluetoothAddress();
+            Beacon visible = new Beacon(major, minor, name, uuid,distance,address);
             beaconList.add(visible);
 
         }

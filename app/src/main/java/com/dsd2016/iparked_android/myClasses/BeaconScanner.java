@@ -134,7 +134,7 @@ public class BeaconScanner {
                 break;
             }
         }
-        beaconList.add(new Beacon(major, minor, txPower, rssi, name, uuid));
+        beaconList.add(new Beacon(major, minor, name, uuid,1,"49:31:3A:3B:66:AE"));
     }
 
     private void addBeaconRecord(byte[] record, String name, int rssi) {

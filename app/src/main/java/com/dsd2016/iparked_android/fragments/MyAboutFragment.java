@@ -79,11 +79,11 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 Long t;
-                t=IparkedApp.mDbHelper.Insert("Car 1",1,1,"11111");
-                t=IparkedApp.mDbHelper.Insert("Car 2",2,2,"22222");
-                t=IparkedApp.mDbHelper.Insert("Car 3",3,3,"33333");
-                t=IparkedApp.mDbHelper.Insert("Car 4",4,4,"44444");
-                t=IparkedApp.mDbHelper.Insert("Car 5",5,5,"55555");
+                t=IparkedApp.mDbHelper.Insert("Car 1",1,1,"11111","BF:A7:FC:FA:B2:F6");
+                t=IparkedApp.mDbHelper.Insert("Car 2",2,2,"22222","81:B6:2D:0B:FB:21");
+                t=IparkedApp.mDbHelper.Insert("Car 3",3,3,"33333","FC:64:FD:67:A8:CD");
+                t=IparkedApp.mDbHelper.Insert("Car 4",4,4,"44444","F5:12:A0:88:8E:F6");
+                t=IparkedApp.mDbHelper.Insert("Car 5",5,5,"55555","49:31:3A:3B:66:AE");
 
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }
