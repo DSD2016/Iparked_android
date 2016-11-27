@@ -8,25 +8,36 @@
     <TextView android:id="@+id/beacon_name"
         android:textSize="25sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/beacon_address"
+        android:textSize="25sp"
+        android:textColor="@android:color/black" />
 
     <TextView android:id="@+id/beacon_uuid"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black" />
 
     <TextView android:id="@+id/beacon_numbers"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black" />
 
     <TextView android:id="@+id/beacon_distance"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -47,11 +58,5 @@
             android:id="@+id/btn_edit_beacon"
             android:layout_weight="1" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/b_del"
-            android:id="@+id/btn_delete_beacon"
-            android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>

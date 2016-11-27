@@ -20,6 +20,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                     BeaconDatabaseSchema.Beacons.COLUMN_MINOR + " INTEGER" + COMMA_SEP +
                     BeaconDatabaseSchema.Beacons.COLUMN_UUID + TEXT_TYPE + COMMA_SEP +
                     BeaconDatabaseSchema.Beacons.COLUMN_MAJOR + " INTEGER" + COMMA_SEP +
+                    BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS + TEXT_TYPE + COMMA_SEP +
                     BeaconDatabaseSchema.Beacons.COLUMN_STORED + " INTEGER" + " )";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -46,7 +47,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public long Insert(String name,int major,int minor,String uuid){
+    public long Insert(String name,int major,int minor,String uuid,String address){
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -55,6 +56,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_MINOR, minor);
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_UUID, uuid);
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_MAJOR, major);
+        values.put(BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS, address);
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_STORED, 1);
 
         long newRowId = db.insert(BeaconDatabaseSchema.Beacons.TABLE_NAME, null, values);
@@ -69,6 +71,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                 BeaconDatabaseSchema.Beacons.COLUMN_MINOR,
                 BeaconDatabaseSchema.Beacons.COLUMN_UUID,
                 BeaconDatabaseSchema.Beacons.COLUMN_MAJOR,
+                BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS,
                 BeaconDatabaseSchema.Beacons.COLUMN_STORED
         };
         Cursor c = db.query(
@@ -82,25 +85,31 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         );
         return c;
     }
-    public void Delete(String uuid){
+    public Boolean Delete(String address){
         SQLiteDatabase db = this.getWritableDatabase();
 
 
-        String selection = BeaconDatabaseSchema.Beacons.COLUMN_UUID + " LIKE ?";
+        String selection = BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS + " LIKE ?";
 
-        String[] selectionArgs = { uuid };
+        String[] selectionArgs = { address };
 
-        db.delete(BeaconDatabaseSchema.Beacons.TABLE_NAME, selection, selectionArgs);
+        int delete = db.delete(BeaconDatabaseSchema.Beacons.TABLE_NAME, selection, selectionArgs);
+        if(delete==0){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
-    public Boolean Update(String newname,String uuid){
+    public Boolean Update(String newname,String address){
 
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues values = new ContentValues();
         values.put(BeaconDatabaseSchema.Beacons.COLUMN_NAME, newname);
 
 // Which row to update, based on the title
-        String selection = BeaconDatabaseSchema.Beacons.COLUMN_UUID + " LIKE ?";
-        String[] selectionArgs = { uuid };
+        String selection = BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS + " LIKE ?";
+        String[] selectionArgs = { address };
 
         int count = db.update(
                 BeaconDatabaseSchema.Beacons.TABLE_NAME,

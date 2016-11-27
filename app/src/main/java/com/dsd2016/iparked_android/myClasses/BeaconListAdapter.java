@@ -8,6 +8,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.dsd2016.iparked_android.R;
+import com.dsd2016.iparked_android.fragments.MyMapFragment;
+import com.dsd2016.iparked_android.fragments.MyPairingFragment;
 
 import java.util.ArrayList;
 
@@ -17,11 +19,12 @@ public class BeaconListAdapter extends BaseAdapter{
 
     protected ArrayList<Beacon> beaconList;
     private LayoutInflater mInflator;
+    private MyPairingFragment fragment;
 
-
-    public BeaconListAdapter(LayoutInflater mInflator) {
-     super();
-     this.mInflator = mInflator;
+    public BeaconListAdapter(LayoutInflater mInflator, MyPairingFragment fragment) {
+        super();
+        this.fragment = fragment;
+        this.mInflator = mInflator;
         beaconList = new ArrayList<>();
     }
 
@@ -56,11 +59,13 @@ public class BeaconListAdapter extends BaseAdapter{
         TextView beaconUuid;
         TextView beaconNumbers;
         TextView beaconDistance;
-        ImageButton addBeacon, editBeacon, deleteBeacon;
+        TextView beaconAddress;
+        ImageButton adddelBeacon, editBeacon;
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, ViewGroup viewGroup) {
+        final int index=i;
         ViewHolder viewHolder;
         // General ListView optimization code.
         if (view == null) {
@@ -70,12 +75,28 @@ public class BeaconListAdapter extends BaseAdapter{
             viewHolder.beaconUuid = (TextView) view.findViewById(R.id.beacon_uuid);
             viewHolder.beaconNumbers = (TextView) view.findViewById(R.id.beacon_numbers);
             viewHolder.beaconDistance = (TextView) view.findViewById(R.id.beacon_distance);
-            viewHolder.addBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
-            viewHolder.addBeacon.setEnabled(false);
+            viewHolder.beaconAddress = (TextView) view.findViewById(R.id.beacon_address);
+            viewHolder.adddelBeacon = (ImageButton) view.findViewById(R.id.btn_add_beacon);
+            viewHolder.adddelBeacon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(view.getTag().toString().equals("delete")){
+                        fragment.deleteBeacon(beaconList.get(index));
+                    }
+                    else{
+                        fragment.addBeacon(beaconList.get(index));
+                    }
+                }
+            });
             viewHolder.editBeacon = (ImageButton) view.findViewById(R.id.btn_edit_beacon);
-            viewHolder.editBeacon.setEnabled(false);
-            viewHolder.deleteBeacon = (ImageButton) view.findViewById(R.id.btn_delete_beacon);
-            viewHolder.deleteBeacon.setEnabled(false);
+            viewHolder.editBeacon.setVisibility(View.INVISIBLE);
+            viewHolder.editBeacon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    fragment.editBeacon(beaconList.get(index));
+                }
+            });
+
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -91,14 +112,16 @@ public class BeaconListAdapter extends BaseAdapter{
         viewHolder.beaconUuid.setText("UUID:"+ beacon.getUuid());
         viewHolder.beaconNumbers.setText("Major: " + beacon.getMajor() + "  Minor: " + beacon.getMinor());
         viewHolder.beaconDistance.setText("Distance: " + beacon.getDistance());
-
-        if(beacon.getStored()){                                                     // Add button enabled only if beacon not stored
-            viewHolder.editBeacon.setEnabled(true);                                 // Mod and Del buttons enabled otherwise
-            viewHolder.deleteBeacon.setEnabled(true);
-        }else
-            viewHolder.addBeacon.setEnabled(true);
-
-
+        viewHolder.beaconAddress.setText("Address: " + beacon.getAddress());
+        if(beacon.getStored()==1){                                                     // Add button enabled only if beacon not stored
+            viewHolder.editBeacon.setVisibility(View.VISIBLE);
+            viewHolder.adddelBeacon.setImageResource(R.drawable.b_del);
+            viewHolder.adddelBeacon.setTag("delete");
+        }else{
+            viewHolder.editBeacon.setVisibility(View.INVISIBLE);
+            viewHolder.adddelBeacon.setImageResource(R.drawable.b_add);
+            viewHolder.adddelBeacon.setTag("add");
+        }
 
         return view;
     }

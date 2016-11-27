@@ -38,9 +38,7 @@ public class SplashActivity extends AppCompatActivity {
         animateSplashScreen();
         checkPermissions();
         allowBluetooth();
-
     }
-
 
     private void hideActionBar() {
 

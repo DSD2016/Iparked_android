@@ -1,16 +1,26 @@
 package com.dsd2016.iparked_android.services;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import com.dsd2016.iparked_android.activities.MainActivity;
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -22,10 +32,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier {
+public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private ArrayList<Beacon> beaconList;
     private BeaconManager beaconManager;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
 
     public BeaconProximityService() {
         super();
@@ -40,12 +52,22 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         beaconList = new ArrayList<>();
 
         /** Register intents */
-        registerReceiver(getBeacons, new IntentFilter("com.dsd2016.iparked_android.get_beacons"));
+        registerReceiver(getBeaconsOrLocation, new IntentFilter("com.dsd2016.iparked_android.get_beacons"));
+        registerReceiver(getBeaconsOrLocation, new IntentFilter("com.dsd2016.iparked_android.get_location"));
 
         /** Register beacon monitoring */
         beaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         beaconManager.bind(this);
+
+        /** Preparing the Google Api to get the location */
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
     }
 
@@ -55,8 +77,9 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         super.onDestroy();
 
         /** Remove beacon scanning schedule */
-        unregisterReceiver(getBeacons);
+        unregisterReceiver(getBeaconsOrLocation);
         beaconManager.unbind(this);
+        mGoogleApiClient.disconnect();
     }
 
 
@@ -89,8 +112,8 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             int minor = beacon.getId3().toInt();
             String name = beacon.getBluetoothName();
             double distance = beacon.getDistance();
-
-            Beacon visible = new Beacon(major,minor,beacon.getTxPower(),beacon.getRssi(),name,uuid);
+            String address = beacon.getBluetoothAddress();
+            Beacon visible = new Beacon(major, minor, name, uuid,distance,address);
             beaconList.add(visible);
 
         }
@@ -100,16 +123,24 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     public void returnNearbyBeacons() {
 
         /** Broadcasts intent containing the list of nearby beacons */
-        Intent test=new Intent("com.dsd2016.iparked_android.return_beacons");
-        test.putParcelableArrayListExtra("BeaconList",beaconList);
-        sendBroadcast(test);
+        Intent beaconListIntent = new Intent("com.dsd2016.iparked_android.return_beacons");
+        beaconListIntent.putParcelableArrayListExtra("BeaconList", beaconList);
+        sendBroadcast(beaconListIntent);
 
 
     }
 
+    private void returnLocation() {
 
-    /** Broadcast receiver for getting and returning the list of beacons */
-    private final BroadcastReceiver getBeacons = new BroadcastReceiver() {
+        /** Broadcasts intent containing the the last location */
+        Intent lastLocationIntent = new Intent("com.dsd2016.iparked_android.return_location");
+        lastLocationIntent.putExtra("location",mLastLocation);
+        sendBroadcast(lastLocationIntent);
+    }
+
+
+    /** Broadcast receiver for getting and returning the list of beacons Or the last Location */
+    private final BroadcastReceiver getBeaconsOrLocation = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -117,9 +148,37 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
             if (action.equals("com.dsd2016.iparked_android.get_beacons")) {
                 returnNearbyBeacons();
+            } else if (action.equals("com.dsd2016.iparked_android.get_location")) {
+                mGoogleApiClient.connect();
             }
         }
 
     };
 
+
+    /** Methods to connect and retrieve user last location */
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            returnLocation();
+        }
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }

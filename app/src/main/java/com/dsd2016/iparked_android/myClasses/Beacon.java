@@ -8,50 +8,39 @@ public class Beacon implements Parcelable{
 
     private int major;
     private int minor;
-    private int txPower;
-    private int rssi;
     private String name;
     private double distance;
-    private boolean stored; // true if beacon is stored in database
+    private int stored; // 1 if beacon is stored in database
     private String uuid;
+    private String address;
 
-    public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid) {
+    public Beacon(int major, int minor, String name, String uuid,int stored,String address) {
         this.major = major;
         this.minor = minor;
-        this.txPower = txPower;
-        this.rssi = rssi;
         this.name = name;
         this.uuid = uuid;
-        setDistance(txPower, rssi);
-        this.stored = false;
-    }
-
-    public Beacon(int major, int minor, int txPower, int rssi, String name, String uuid, boolean stored) { // Beacon creator with stored variable
-        this(major, minor, txPower, rssi, name, uuid);
         this.stored = stored;
+        this.address = address;
     }
-
-    public Beacon(String uuid, int major, int minor, double distance) {
-        this.uuid = uuid;
+    public Beacon(int major, int minor, String name, String uuid,double distance,String address) {
         this.major = major;
         this.minor = minor;
+        this.name = name;
+        this.uuid = uuid;
         this.distance = distance;
+        this.stored = 0;
+        this.address = address;
     }
 
     public Beacon(Parcel in) {
         major = in.readInt();
         minor = in.readInt();
-        txPower = in.readInt();
-        rssi = in.readInt();
         name = in.readString();
         uuid = in.readString();
         distance = in.readDouble();
-        boolean[] temparray = new boolean[1];
-        in.readBooleanArray(temparray);
-        stored = temparray[0];
+        stored = in.readInt();
+        address = in.readString();
     }
-
-
 
     public int getMajor() {
         return major;
@@ -61,11 +50,9 @@ public class Beacon implements Parcelable{
         return minor;
     }
 
-    public int getTxPower() {return txPower;}
-
-    public int getRssi() {return rssi;}
-
     public String getName() {return name;}
+
+    public String getAddress() {return address;}
 
     public void setName(String name) {this.name = name;}
 
@@ -75,20 +62,7 @@ public class Beacon implements Parcelable{
 
     public double getDistance() {return distance;}
 
-    public void setDistance(int txPower, int rssi) {
-        if (rssi == 0) {
-            this.distance = -1.0; // if we cannot determine accuracy, return -1.
-        }
-
-        double ratio = rssi*1.0/txPower;
-        this.distance = Math.pow(ratio, 10);
-    }
-
-    public void setStored(boolean stored){
-        this.stored = stored;
-    }
-
-    public boolean getStored(){
+    public int getStored(){
         return this.stored;
     }
 
@@ -96,12 +70,11 @@ public class Beacon implements Parcelable{
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(major);
         out.writeInt(minor);
-        out.writeInt(txPower);
-        out.writeInt(rssi);
         out.writeString(name);
         out.writeString(uuid);
         out.writeDouble(distance);
-        out.writeBooleanArray(new boolean[]{stored});
+        out.writeInt(stored);
+        out.writeString(address);
     }
     @Override
     public int describeContents() {
