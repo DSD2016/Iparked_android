@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -18,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -34,10 +34,12 @@ import java.util.Collection;
 
 public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private ArrayList<Beacon> beaconList;
+    private ArrayList<Beacon> beaconList = new ArrayList<>();
+    private ArrayList<Beacon> visiblePersonalBeacons = new ArrayList<>();
     private BeaconManager beaconManager;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private double maxDistance = 20.0;
 
     public BeaconProximityService() {
         super();
@@ -104,18 +106,66 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
     @Override
     public void didRangeBeaconsInRegion(Collection<org.altbeacon.beacon.Beacon> collection, Region region) {
+
         beaconList.clear();
+        visiblePersonalBeacons.clear();
+        ArrayList<Beacon> personalBeaconList = IparkedApp.mDbHelper.getPersonalBeacons();
+
         for (org.altbeacon.beacon.Beacon beacon : collection) {
 
+            /** Get beacon information */
             String uuid = beacon.getId1().toString();
             int major = beacon.getId2().toInt();
             int minor = beacon.getId3().toInt();
             String name = beacon.getBluetoothName();
             double distance = beacon.getDistance();
             String address = beacon.getBluetoothAddress();
-            Beacon visible = new Beacon(major, minor, name, uuid,distance,address);
+            Beacon visible = new Beacon(major, minor, name, uuid, distance, address);
+
+            /** Add beacon to visible beacon list */
             beaconList.add(visible);
 
+            /** Check if beacon is personal beacon */
+            if (personalBeaconList == null) {
+                   continue;
+            }
+
+            for (Beacon personalBeacon : personalBeaconList) {
+                if (visible.getAddress().equals(personalBeacon.getAddress())) {
+                    if (visible.getDistance() < maxDistance) {
+                        if (personalBeacon.getLocation() != null) {
+                            visiblePersonalBeacons.add(visible);
+                            IparkedApp.mDbHelper.updateBeaconLocation(visible);
+                        }
+                    }
+                    else {
+                        if(personalBeacon.getLocation() != null) {
+                            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                                return;
+                            }
+
+                            Location location = LocationServices.FusedLocationApi.getLastLocation(
+                                    mGoogleApiClient);
+                            personalBeacon.setLocation(location);
+                            IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                        }
+                    }
+                }
+                else {
+                    if(personalBeacon.getLocation() != null) {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                            return;
+                        }
+
+                        Location location = LocationServices.FusedLocationApi.getLastLocation(
+                                mGoogleApiClient);
+                        personalBeacon.setLocation(location);
+                        IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                    }
+                }
+            }
         }
     }
 

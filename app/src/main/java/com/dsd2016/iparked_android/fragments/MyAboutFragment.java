@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -79,11 +78,11 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 Long t;
-                t=IparkedApp.mDbHelper.Insert("Car 1",1,1,"11111","BF:A7:FC:FA:B2:F6");
-                t=IparkedApp.mDbHelper.Insert("Car 2",2,2,"22222","81:B6:2D:0B:FB:21");
-                t=IparkedApp.mDbHelper.Insert("Car 3",3,3,"33333","FC:64:FD:67:A8:CD");
-                t=IparkedApp.mDbHelper.Insert("Car 4",4,4,"44444","F5:12:A0:88:8E:F6");
-                t=IparkedApp.mDbHelper.Insert("Car 5",5,5,"55555","49:31:3A:3B:66:AE");
+                t=IparkedApp.mDbHelper.insert("Car 1",1,1,"11111","BF:A7:FC:FA:B2:F6", null);
+                t=IparkedApp.mDbHelper.insert("Car 2",2,2,"22222","81:B6:2D:0B:FB:21", null);
+                t=IparkedApp.mDbHelper.insert("Car 3",3,3,"33333","FC:64:FD:67:A8:CD", null);
+                t=IparkedApp.mDbHelper.insert("Car 4",4,4,"44444","F5:12:A0:88:8E:F6", null);
+                t=IparkedApp.mDbHelper.insert("Car 5",5,5,"55555","49:31:3A:3B:66:AE", null);
 
                 Toast.makeText(getActivity(), t.toString(), Toast.LENGTH_SHORT).show();
             }
