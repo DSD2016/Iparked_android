@@ -370,13 +370,14 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     }
 
     public void onGotLastLocation(Location location) {
-        LatLng fer_parking = new LatLng(45.800617, 15.971309);
+        LatLng fer_parking = new LatLng(45.800700, 15.971215);
 
         GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
-                .position(fer_parking, 256f, 512f);
+                .position(fer_parking, 31, 62)
+                .bearing(87);
         map.addGroundOverlay(ferParkingMap);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 15);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 19);
         map.animateCamera(cameraUpdate);
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -385,6 +386,12 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
         if (map != null) {
             ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
 
+            /** Check if beacon list is not initialized */
+            if (beacons == null) {
+                return;
+            }
+
+            /** Add beacons from database to map */
             for (Beacon beacon : beacons) {
 
                 if (beacon.getLocation() == null) {
@@ -408,6 +415,7 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
 
         map.setMyLocationEnabled(true);
     }
+
     public void CheckContinue(){
         myLocationProvider.Continue();
     }

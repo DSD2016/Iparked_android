@@ -138,7 +138,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Log.v("iParked", "Return beacons");
             visiblebeaconList.clear();
             visiblebeaconList = intent.getParcelableArrayListExtra("BeaconList");
            // ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");

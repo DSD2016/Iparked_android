@@ -115,6 +115,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                 BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON,
         };
 
+        // TODO fix properly)
         return db.query(
                 BeaconDatabaseSchema.Beacons.TABLE_NAME, projection, null, null, null, null, null
         );
