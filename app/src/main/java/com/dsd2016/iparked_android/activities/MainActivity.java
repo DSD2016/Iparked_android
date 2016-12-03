@@ -208,6 +208,8 @@ public class MainActivity extends AppCompatActivity {
                 setTitle(R.string.pairtitle);
                 mDrawerLayout.closeDrawer(mDrawerList);
                 break;
+            case 4:
+                finishAffinity();
         }
     }
 
@@ -215,5 +217,16 @@ public class MainActivity extends AppCompatActivity {
     public void setTitle(CharSequence title) {
         mTitle = title;
         getSupportActionBar().setTitle(mTitle);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mDrawerLayout.isDrawerOpen(mDrawerList)){
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
+        else{
+            finishAffinity();
+        }
+        //super.onBackPressed();
     }
 }
