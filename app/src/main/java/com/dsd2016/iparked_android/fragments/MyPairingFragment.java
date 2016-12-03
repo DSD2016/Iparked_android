@@ -1,49 +1,30 @@
 package com.dsd2016.iparked_android.fragments;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.support.v4.app.ListFragment;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-
 import android.widget.EditText;
-import android.widget.ImageButton;
-
 import android.widget.ListView;
-
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
 import com.dsd2016.iparked_android.myClasses.BeaconDatabaseSchema;
 import com.dsd2016.iparked_android.myClasses.BeaconListAdapter;
-import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
-import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
-import com.dsd2016.iparked_android.R;
-import com.ogaclejapan.arclayout.ArcLayout;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This fragment lists out nearby beacons in clickable list. When user clicks on certain beacon, he
@@ -59,18 +40,12 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     private ArrayList<Beacon> storedbeaconList = new ArrayList<Beacon>(1);
     private ArrayList<Beacon> visiblebeaconList = new ArrayList<Beacon>(1);
 
-    private OnMenuItemSelectedListener mListener;
 
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Activity activity=(Activity)context;
-        try {
-            mListener = (OnMenuItemSelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnMenuItemSelectedListener");
-        }
+
     }
 
     public MyPairingFragment() {
@@ -82,12 +57,9 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myView=inflater.inflate(R.layout.fragment_pairing, container, false);
-        IparkedApp.mMenuHandler.setElements(myView.findViewById(R.id.root_layout),getContext());
 
         myView.findViewById(R.id.scan_button).setOnClickListener(this);
-        myView.findViewById(R.id.fab).setOnClickListener(this);
         listView = (ListView) myView.findViewById(android.R.id.list);
-
         beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater(),this);
 
         return myView;
@@ -128,9 +100,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
 
             visiblebeaconList.clear();
             visiblebeaconList = intent.getParcelableArrayListExtra("BeaconList");
-           // ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
-           // ArrayList<Beacon> beaconList = (ArrayList<Beacon>)parcelableBeaconList.getbeaconList();
-
             populateListView();
 
         }
@@ -183,9 +152,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         switch (v.getId()) {
             case R.id.scan_button:
                 getActivity().sendBroadcast(new Intent().setAction("com.dsd2016.iparked_android.get_beacons"));
-                break;
-            case R.id.fab:
-                IparkedApp.mMenuHandler.handleMenu();
                 break;
         }
     }

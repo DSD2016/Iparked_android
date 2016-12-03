@@ -1,57 +1,35 @@
 package com.dsd2016.iparked_android.fragments;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
-import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
-import com.dsd2016.iparked_android.myClasses.IparkedApp;
-import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
 import com.dsd2016.iparked_android.R;
-import com.ogaclejapan.arclayout.ArcLayout;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.dsd2016.iparked_android.myClasses.IparkedApp;
 
 
-public class MyAboutFragment extends Fragment implements View.OnClickListener {
+public class MyAboutFragment extends Fragment{
 
 
     private static final String TAG = "ABOUT_FRAGMENT";
     Toast toast = null;
     Button btn_insert,btn_location;
-    OnMenuItemSelectedListener mListener;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Activity activity=(Activity)context;
-        try {
-            mListener = (OnMenuItemSelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnMenuItemSelectedListener");
-        }
+
     }
     @Override
     public void onResume() {
@@ -66,7 +44,6 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
         View myView=inflater.inflate(R.layout.fragment_about, container, false);
 
 
-        IparkedApp.mMenuHandler.setElements(myView.findViewById(R.id.root_layout),getContext());
         /** FOR TESTING,Inserting dummy info to the db */
         btn_insert=(Button)myView.findViewById(R.id.btn_insert);
         btn_insert.setOnClickListener(new View.OnClickListener() {
@@ -93,8 +70,6 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
             }
         });
         /** Building the menu */
-
-        myView.findViewById(R.id.fab).setOnClickListener(this);
         return myView;
 
     }
@@ -109,9 +84,7 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-
             Log.v("iParked", "Return beacons");
-
             Location mylocation = intent.getExtras().getParcelable("location");
             Toast.makeText(context,String.valueOf(mylocation.getLatitude()), Toast.LENGTH_SHORT).show();
 
@@ -122,24 +95,5 @@ public class MyAboutFragment extends Fragment implements View.OnClickListener {
     }
     public MyAboutFragment() {
     }
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.fab) {
-            IparkedApp.mMenuHandler.handleMenu();
-            return;
-        }
-
-    }
-    /** Method for notifying the container to change the fragment */
-
-
-
-
-
-
-    /** Menu Precedures */
-
-
-
 
 }

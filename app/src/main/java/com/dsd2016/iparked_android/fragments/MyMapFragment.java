@@ -2,18 +2,10 @@ package com.dsd2016.iparked_android.fragments;
 
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -22,21 +14,14 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
-import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
-import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
-import com.dsd2016.iparked_android.R;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -47,18 +32,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.ogaclejapan.arclayout.ArcLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class MyMapFragment extends Fragment implements View.OnClickListener, OnMapReadyCallback, OnGotLastLocation {
+public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGotLastLocation {
     private static final String TAG = "MAP_FRAGMENT";
     View myView;
 
-    OnMenuItemSelectedListener mListener;
     protected MapView mapView;
     protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
@@ -113,12 +95,7 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Activity activity = (Activity) context;
-        try {
-            mListener = (OnMenuItemSelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnMenuItemSelectedListener");
-        }
+
     }
 
 
@@ -126,27 +103,16 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.fragment_map, container, false);
-        myView.findViewById(R.id.fab).setOnClickListener(this);
-        IparkedApp.mMenuHandler.setElements(myView.findViewById(R.id.root_layout),getContext());
         mapView = (MapView) myView.findViewById(R.id.mapview);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         return myView;
-
     }
 
     public static MyMapFragment newInstance() {
         return new MyMapFragment();
     }
 
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.fab) {
-            IparkedApp.mMenuHandler.handleMenu();
-            return;
-        }
-    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {

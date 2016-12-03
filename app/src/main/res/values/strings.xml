@@ -20,4 +20,10 @@
     <string name="inputdialogtitle">Enter a name for this beacon</string>
     <string name="editdialogtitle">Edit beacon name</string>
     <string name="deletedialogtitle">Are you sure to delete beacon?</string>
+    <string name="abouttitle">About Us</string>
+    <string name="findtitle">Find Your Car</string>
+    <string name="settingtitle">Settings</string>
+    <string name="pairtitle">Beacon Management</string>
+    <string name="drawer_open">open</string>
+    <string name="drawer_close">close</string>
 </resources>
