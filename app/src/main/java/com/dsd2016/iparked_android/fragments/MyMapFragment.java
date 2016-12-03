@@ -30,7 +30,9 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.dsd2016.iparked_android.myClasses.AnimatorUtils;
+import com.dsd2016.iparked_android.myClasses.Beacon;
 import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
+import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
 import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
@@ -48,11 +50,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.ogaclejapan.arclayout.ArcLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MyMapFragment extends Fragment implements View.OnClickListener, OnMapReadyCallback, OnGotLastLocation {
     private static final String TAG = "MAP_FRAGMENT";
-    Toast toast = null;
     ClipRevealFrame menuLayout;
     ArcLayout arcLayout;
     View centerItem;
@@ -63,21 +66,24 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     protected MapView mapView;
     protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
+    private Map<String, MarkerOptions> markers;
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        markers = new HashMap<>();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         if (mapView != null) {
             mapView.onResume();
         }
+
     }
 
     @Override
@@ -143,9 +149,6 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
 
     public static MyMapFragment newInstance() {
         return new MyMapFragment();
-    }
-
-    public MyMapFragment() {
     }
 
 
@@ -345,9 +348,7 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
         map.getUiSettings().setMapToolbarEnabled(true);
         MapsInitializer.initialize(this.getContext());
         myLocationProvider = new MyLocationProvider(getContext(), this);
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { }
     }
 
     @Override
@@ -369,23 +370,52 @@ public class MyMapFragment extends Fragment implements View.OnClickListener, OnM
     }
 
     public void onGotLastLocation(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude() + 0.005);
-        LatLng fer_parking = new LatLng(45.800617, 15.971309);
-        Bitmap bm=BitmapFactory.decodeResource(getResources(),R.drawable.iparked_garage_fer);
+        LatLng fer_parking = new LatLng(45.800700, 15.971215);
 
         GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
-                .position(fer_parking, 256f, 512f);
+                .position(fer_parking, 31, 62)
+                .bearing(87);
         map.addGroundOverlay(ferParkingMap);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 15);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 19);
         map.animateCamera(cameraUpdate);
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
         }
+
+        if (map != null) {
+            ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
+
+            /** Check if beacon list is not initialized */
+            if (beacons == null) {
+                return;
+            }
+
+            /** Add beacons from database to map */
+            for (Beacon beacon : beacons) {
+
+                if (beacon.getLocation() == null) {
+                    continue;
+                }
+
+                LatLng latLng = new LatLng(beacon.getLocation().getLatitude(), beacon.getLocation().getLongitude());
+
+                MarkerOptions marker = new MarkerOptions();
+                marker.position(latLng);
+                marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
+                marker.title(beacon.getName());
+                marker.snippet("Parked on 12/11/2016 12:12:12");
+
+                map.addMarker(marker);
+            }
+
+        } else {
+            Log.v("iParked", "map null");
+        }
+
         map.setMyLocationEnabled(true);
-        map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 12/11/2016 12:12:12"));
-        map.addMarker(new MarkerOptions().position(fer_parking).icon(BitmapDescriptorFactory.fromResource(R.drawable.car2)).title("Your Car").snippet("Parked on 15/11/2016 10:25:32"));
     }
+
     public void CheckContinue(){
         myLocationProvider.Continue();
     }

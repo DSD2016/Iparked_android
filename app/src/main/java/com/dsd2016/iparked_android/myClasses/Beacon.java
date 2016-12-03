@@ -1,6 +1,7 @@
 package com.dsd2016.iparked_android.myClasses;
 
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,16 +14,29 @@ public class Beacon implements Parcelable{
     private int stored; // 1 if beacon is stored in database
     private String uuid;
     private String address;
+    private Location location;
 
-    public Beacon(int major, int minor, String name, String uuid,int stored,String address) {
+    public Beacon(int major, int minor, String name, String uuid, int stored, String address) {
         this.major = major;
         this.minor = minor;
         this.name = name;
         this.uuid = uuid;
         this.stored = stored;
         this.address = address;
+        this.location = null;
     }
-    public Beacon(int major, int minor, String name, String uuid,double distance,String address) {
+
+    public Beacon(int major, int minor, String name, String uuid, int stored, String address, Location location) {
+        this.major = major;
+        this.minor = minor;
+        this.name = name;
+        this.uuid = uuid;
+        this.stored = stored;
+        this.address = address;
+        this.location = location;
+    }
+
+    public Beacon(int major, int minor, String name, String uuid, double distance, String address) {
         this.major = major;
         this.minor = minor;
         this.name = name;
@@ -30,9 +44,10 @@ public class Beacon implements Parcelable{
         this.distance = distance;
         this.stored = 0;
         this.address = address;
+        this.location = null;
     }
 
-    public Beacon(Parcel in) {
+    private Beacon(Parcel in) {
         major = in.readInt();
         minor = in.readInt();
         name = in.readString();
@@ -62,9 +77,13 @@ public class Beacon implements Parcelable{
 
     public double getDistance() {return distance;}
 
-    public int getStored(){
+    int getStored(){
         return this.stored;
     }
+
+    public void setLocation(Location location) { this.location = location; }
+
+    public Location getLocation() { return  this.location; }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
@@ -76,11 +95,13 @@ public class Beacon implements Parcelable{
         out.writeInt(stored);
         out.writeString(address);
     }
+
     @Override
     public int describeContents() {
         return 0;
     }
-    // Method to recreate a Beacon from a Parcel
+
+    /** Method to recreate a Beacon from a Parcel */
     public static Creator<Beacon> CREATOR = new Creator<Beacon>() {
 
         @Override

@@ -11,7 +11,6 @@ import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 
 import android.content.Context;
@@ -40,7 +39,6 @@ import com.dsd2016.iparked_android.myClasses.BeaconListAdapter;
 import com.dsd2016.iparked_android.myClasses.ClipRevealFrame;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.OnMenuItemSelectedListener;
-import com.dsd2016.iparked_android.myClasses.ParcelableBeaconList;
 import com.dsd2016.iparked_android.R;
 import com.ogaclejapan.arclayout.ArcLayout;
 
@@ -140,7 +138,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Log.v("iParked", "Return beacons");
             visiblebeaconList.clear();
             visiblebeaconList = intent.getParcelableArrayListExtra("BeaconList");
            // ParcelableBeaconList parcelableBeaconList = intent.getParcelableExtra("BeaconList");
@@ -153,7 +150,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
 
     private void addStoredBeacon() {
         storedbeaconList.clear();
-        Cursor c = IparkedApp.mDbHelper.Read();
+        Cursor c = IparkedApp.mDbHelper.read();
         String name,uuid,address;
         int major,minor,stored;
         for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -220,7 +217,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                long insert = IparkedApp.mDbHelper.Insert(name, beacon.getMajor(), beacon.getMinor(), beacon.getUuid(),beacon.getAddress());
+                long insert = IparkedApp.mDbHelper.insert(name, beacon.getMajor(), beacon.getMinor(), beacon.getUuid(),beacon.getAddress(), beacon.getLocation());
                 if(insert!=-1){
                     Toast.makeText(getContext(), "Beacon Successfully Saved", Toast.LENGTH_SHORT).show();
                     populateListView();
@@ -252,7 +249,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                Boolean update = IparkedApp.mDbHelper.Update(name, beacon.getAddress());
+                Boolean update = IparkedApp.mDbHelper.update(name, beacon.getAddress());
                 if(update){
                     Toast.makeText(getContext(), "Beacon Successfully Updated", Toast.LENGTH_SHORT).show();
                     populateListView();
@@ -282,7 +279,7 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                Boolean delete = IparkedApp.mDbHelper.Delete(beacon.getAddress());
+                Boolean delete = IparkedApp.mDbHelper.delete(beacon.getAddress());
                 if(delete){
                     Toast.makeText(getContext(), "Beacon Successfully Deleted", Toast.LENGTH_SHORT).show();
                     populateListView();
