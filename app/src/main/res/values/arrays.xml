@@ -8,4 +8,11 @@
         <item>10</item>
         <item>20</item>
     </string-array>
+    <string-array name="menuitems_array">
+        <item>Finding My Car</item>
+        <item>Beacon Management</item>
+        <item>Settings</item>
+        <item>About Us</item>
+        <item>Exit</item>
+    </string-array>
 </resources>
