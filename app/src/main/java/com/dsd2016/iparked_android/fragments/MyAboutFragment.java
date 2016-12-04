@@ -14,10 +14,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
+import com.dsd2016.iparked_android.myClasses.RestCommunicator;
 
 
 public class MyAboutFragment extends Fragment{
@@ -25,7 +32,8 @@ public class MyAboutFragment extends Fragment{
 
     private static final String TAG = "ABOUT_FRAGMENT";
     Toast toast = null;
-    Button btn_insert,btn_location;
+    Button btn_insert,btn_location,btn_request;
+    TextView txt_res;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -42,6 +50,35 @@ public class MyAboutFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myView=inflater.inflate(R.layout.fragment_about, container, false);
+
+        btn_request = (Button) myView.findViewById(R.id.btn_req);
+        txt_res = (TextView) myView.findViewById(R.id.txt_resp);
+        btn_request.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String url ="http://www.google.com";
+
+                RequestQueue queue = RestCommunicator.getInstance(getContext()).
+                        getRequestQueue();
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                               txt_res.setText(response);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                RestCommunicator.getInstance(getContext()).addToRequestQueue(stringRequest);
+
+            }
+        });
 
 
         /** FOR TESTING,Inserting dummy info to the db */

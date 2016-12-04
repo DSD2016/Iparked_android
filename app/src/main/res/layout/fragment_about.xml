@@ -8,36 +8,55 @@
 
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <Button
-            android:text="Insert"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_insert"
-            android:layout_weight="1" />
-
-        <Button
-            android:text="GetLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_location"
-            android:layout_weight="1" />
-    </LinearLayout>
-
-    <TextView
-        android:text="Made By Jedi Masters"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/textView2"
-        android:textSize="24sp"
-        android:textColor="@android:color/black"
-        android:textAllCaps="false"
-        android:textAlignment="center"
-        android:gravity="center" />
+        android:gravity="top|center">
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="Load Image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_req"
+                android:layout_weight="1" />
+
+            <Button
+                android:text="Insert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_insert"
+                android:layout_weight="1" />
+
+            <Button
+                android:text="GetLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_location"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txt_resp" />
+
+        <TextView
+            android:text="Made By Jedi Masters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView2"
+            android:textSize="24sp"
+            android:textColor="@android:color/black"
+            android:textAllCaps="false"
+            android:textAlignment="center"
+            android:gravity="center" />
+    </LinearLayout>
 
 
 </FrameLayout>
