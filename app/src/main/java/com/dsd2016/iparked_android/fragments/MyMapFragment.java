@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Math.abs;
+
 public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGotLastLocation {
     private static final String TAG = "MAP_FRAGMENT";
     View myView;
@@ -178,6 +180,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
                 .position(fer_parking, 31, 62)
                 .bearing(87);
+        map.clear();
         map.addGroundOverlay(ferParkingMap);
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 19);
         map.animateCamera(cameraUpdate);
@@ -196,7 +199,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
             /** Add beacons from database to map */
             for (Beacon beacon : beacons) {
 
-                if (beacon.getLocation() == null) {
+                if (abs(beacon.getLocation().getLatitude()) <= 0.01 && abs(beacon.getLocation().getLongitude()) <= 0.01) {
                     continue;
                 }
 

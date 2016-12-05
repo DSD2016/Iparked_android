@@ -161,8 +161,8 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
             values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT, beacon.getLocation().getLatitude());
             values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON, beacon.getLocation().getLongitude());
         } else {
-            values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT, "NULL");
-            values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON, "NULL");
+            values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT, 0.0);
+            values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON, 0.0);
         }
 
         /** Which row to update, based on the title */

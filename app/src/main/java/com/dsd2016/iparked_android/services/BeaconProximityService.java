@@ -27,9 +27,13 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.service.ArmaRssiFilter;
+import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static java.lang.Math.abs;
 
 
 public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -39,7 +43,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private BeaconManager beaconManager;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private double maxDistance = 1.0;
+    private double maxDistance = 1.5;
 
     public BeaconProximityService() {
         super();
@@ -60,6 +64,12 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         /** Register beacon monitoring */
         beaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        beaconManager.setBackgroundBetweenScanPeriod(1000l);
+        beaconManager.setBackgroundScanPeriod(500l);
+        beaconManager.setForegroundBetweenScanPeriod(1000l);
+        beaconManager.setBackgroundScanPeriod(500l);
+        beaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.5);
         beaconManager.bind(this);
 
         /** Preparing the Google Api to get the location */
@@ -182,18 +192,20 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         }
 
         /** Search if personal beacon stopped being visible */
-        for (Beacon visiblePersonalBeacon : visiblePersonalBeacons) {
+        for (Beacon personalBeacon : personalBeaconList) {
             boolean found = false;
 
-            for (Beacon personalBeacon : personalBeaconList) {
+            for (Beacon visiblePersonalBeacon : visiblePersonalBeacons) {
                 if (personalBeacon.getAddress().equals(visiblePersonalBeacon.getAddress())) {
                     found = true;
+                    break;
                 }
             }
 
             if (!found) {
-                if ( isLocationNull(visiblePersonalBeacon.getLocation()) ) {
-                    visiblePersonalBeacon.setLocation(getLocation());
+                if ( isLocationNull(personalBeacon.getLocation()) ) {
+                    personalBeacon.setLocation(getLocation());
+                    IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
                 }
             }
         }
@@ -202,7 +214,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
     /** Helper function that checks if location is null */
     private boolean isLocationNull(Location location) {
-        return location.getLatitude() == 0 && location.getLongitude() == 0;
+        return abs(location.getLatitude()) <= 0.01 && abs(location.getLongitude()) <= 0.01;
     }
 
     /** Checks and returns beacon location */
