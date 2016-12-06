@@ -134,13 +134,10 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             String address = beacon.getBluetoothAddress();
             Beacon visible = new Beacon(major, minor, name, uuid, distance, address);
 
-            Log.v("iParked", Double.toString(visible.getDistance()));
-
             beaconList.add(visible);
 
             /** You need to have at least one personal beacon */
             if (personalBeaconList == null) {
-                Log.v("iParked", "no personal beacons");
                 continue;
             }
 
@@ -149,34 +146,23 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
                 if (visible.getAddress().equals(personalBeacon.getAddress())) {
 
-                    Log.v("iParked", "Personal beacon: " + visible.getAddress());
-
                     /** If beacon is closer than the defined, set it's location to null */
                     if (visible.getDistance() < maxDistance) {
                         visiblePersonalBeacons.add(visible);
                         if ( !isLocationNull(personalBeacon.getLocation()) ) {
-                            Log.v("iParked", "beacon is close, location not null");
                             IparkedApp.mDbHelper.updateBeaconLocation(visible);
-                        } else {
-                            Log.v("iParked", "beacon is close, location is null");
+                            returnLocation();
                         }
-
                     }
 
                     /** If personal beacon is visible but not nearby we need to set its location */
                     else {
 
                         if ( isLocationNull(personalBeacon.getLocation()) ) {
-
-                            Log.v("iParked", "beacon is far, location is null");
-
                             personalBeacon.setLocation(getLocation());
                             IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                            returnLocation();
 
-                            Log.v("iParked", getLocation().toString());
-
-                        } else {
-                            Log.v("iParked", "beacon is far, location not null");
                         }
                     }
                 }
@@ -204,11 +190,11 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                 if ( isLocationNull(personalBeacon.getLocation()) ) {
                     personalBeacon.setLocation(getLocation());
                     IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                    returnLocation();
                 }
             }
         }
         returnNearbyBeacons();
-        returnLocation();
     }
 
     /** Helper function that checks if location is null */
