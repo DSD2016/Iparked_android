@@ -29,8 +29,17 @@ public class BeaconListAdapter extends BaseAdapter{
     }
 
     public void addAll(ArrayList<Beacon> beaconList) {
-        for (Beacon beacon : beaconList) {
-            this.beaconList.add(beacon);
+        for (Beacon newBeacon : beaconList) {
+            boolean found = false;
+            for(Beacon oldBeacon : this.beaconList) {
+                if(oldBeacon.getAddress().equals(newBeacon.getAddress())) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                this.beaconList.add(newBeacon);
+            }
         }
     }
     public void clear() {

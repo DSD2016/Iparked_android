@@ -2,8 +2,11 @@ package com.dsd2016.iparked_android.fragments;
 
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -31,11 +34,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.lang.Math.abs;
 
 public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGotLastLocation {
     private static final String TAG = "MAP_FRAGMENT";
@@ -44,7 +50,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     protected MapView mapView;
     protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
-    private Map<String, MarkerOptions> markers;
+    private Map<String, Marker> markers;
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
 
@@ -58,10 +64,16 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     public void onResume() {
         super.onResume();
 
+        getActivity().registerReceiver(broadCastNewMessage, new IntentFilter("com.dsd2016.iparked_android.return_location"));
         if (mapView != null) {
             mapView.onResume();
         }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(broadCastNewMessage);
     }
 
     @Override
@@ -171,6 +183,47 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
         }
     }
 
+    private BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
+        /**
+         * This method is called by OS when new broadcast is received. Here we are extracting
+         * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
+         * @param context
+         * @param intent
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (map != null) {
+                ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
+
+                /** Check if beacon list is not initialized */
+                if (beacons == null) {
+                    return;
+                }
+
+                /** Add beacons from database to map */
+                for (Beacon beacon : beacons) {
+
+                    Marker marker = markers.get(beacon.getAddress());
+                    if (abs(beacon.getLocation().getLatitude()) <= 0.01 && abs(beacon.getLocation().getLongitude()) <= 0.01 && marker != null) {
+                        marker.remove();
+                        markers.remove(beacon.getAddress());
+                    } else if ((abs(beacon.getLocation().getLatitude()) > 0.01 || abs(beacon.getLocation().getLongitude()) > 0.01) && marker == null) {
+                        LatLng latLng = new LatLng(beacon.getLocation().getLatitude(), beacon.getLocation().getLongitude());
+
+                        MarkerOptions markerOptions = new MarkerOptions();
+                        markerOptions.position(latLng);
+                        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
+                        markerOptions.title(beacon.getName());
+                        markerOptions.snippet("Parked on 12/11/2016 12:12:12");
+                        Marker newMarker = map.addMarker(markerOptions);
+                        markers.put(beacon.getAddress(), newMarker);
+                    }
+                }
+            }
+        }
+    };
+
     public void onGotLastLocation(Location location) {
         LatLng fer_parking = new LatLng(45.800700, 15.971215);
 
@@ -178,41 +231,10 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
                 .position(fer_parking, 31, 62)
                 .bearing(87);
+        map.clear();
         map.addGroundOverlay(ferParkingMap);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(fer_parking, 19);
-        map.animateCamera(cameraUpdate);
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        }
-
-        if (map != null) {
-            ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
-
-            /** Check if beacon list is not initialized */
-            if (beacons == null) {
-                return;
-            }
-
-            /** Add beacons from database to map */
-            for (Beacon beacon : beacons) {
-
-                if (beacon.getLocation() == null) {
-                    continue;
-                }
-
-                LatLng latLng = new LatLng(beacon.getLocation().getLatitude(), beacon.getLocation().getLongitude());
-
-                MarkerOptions marker = new MarkerOptions();
-                marker.position(latLng);
-                marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
-                marker.title(beacon.getName());
-                marker.snippet("Parked on 12/11/2016 12:12:12");
-
-                map.addMarker(marker);
-            }
-
-        } else {
-            Log.v("iParked", "map null");
         }
 
         map.setMyLocationEnabled(true);

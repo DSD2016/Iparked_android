@@ -6,9 +6,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Hrvoje on 19.11.2016..
- */
 
 public class ParcelableBeaconList implements Parcelable {
     public List<Beacon> beaconList = new ArrayList();

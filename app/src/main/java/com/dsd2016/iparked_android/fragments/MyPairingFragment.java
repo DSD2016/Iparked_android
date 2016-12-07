@@ -57,8 +57,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myView=inflater.inflate(R.layout.fragment_pairing, container, false);
-
-        myView.findViewById(R.id.scan_button).setOnClickListener(this);
         listView = (ListView) myView.findViewById(android.R.id.list);
         beaconListAdapter = new BeaconListAdapter(getActivity().getLayoutInflater(),this);
 
@@ -99,9 +97,8 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
 
             visiblebeaconList.clear();
-            visiblebeaconList = intent.getParcelableArrayListExtra("BeaconList");
+            visiblebeaconList = intent.getParcelableArrayListExtra("beaconList");
             populateListView();
-
         }
     };
 
@@ -149,11 +146,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
      */
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.scan_button:
-                getActivity().sendBroadcast(new Intent().setAction("com.dsd2016.iparked_android.get_beacons"));
-                break;
-        }
     }
 
     public void addBeacon(final Beacon beacon){                                                       // Add beacon to Database

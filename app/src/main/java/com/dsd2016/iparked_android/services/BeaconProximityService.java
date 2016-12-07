@@ -27,9 +27,13 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.service.ArmaRssiFilter;
+import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static java.lang.Math.abs;
 
 
 public class BeaconProximityService extends Service implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -39,7 +43,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private BeaconManager beaconManager;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private double maxDistance = 1.0;
+    private double maxDistance = 1.5;
 
     public BeaconProximityService() {
         super();
@@ -60,6 +64,12 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         /** Register beacon monitoring */
         beaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        beaconManager.setBackgroundBetweenScanPeriod(1000l);
+        beaconManager.setBackgroundScanPeriod(1000l);
+        beaconManager.setForegroundBetweenScanPeriod(1000l);
+        beaconManager.setBackgroundScanPeriod(1000l);
+        beaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.5);
         beaconManager.bind(this);
 
         /** Preparing the Google Api to get the location */
@@ -70,7 +80,9 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                     .addApi(LocationServices.API)
                     .build();
         }
-
+        mLastLocation = new Location("");
+        mLastLocation.setLongitude(0.0);
+        mLastLocation.setLatitude(0.0);
     }
 
 
@@ -122,12 +134,10 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             String address = beacon.getBluetoothAddress();
             Beacon visible = new Beacon(major, minor, name, uuid, distance, address);
 
-            Log.v("iParked", Double.toString(visible.getDistance()));
+            beaconList.add(visible);
 
             /** You need to have at least one personal beacon */
             if (personalBeaconList == null) {
-                Log.v("iParked", "no personal beacons");
-                beaconList.add(visible);
                 continue;
             }
 
@@ -136,73 +146,60 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
                 if (visible.getAddress().equals(personalBeacon.getAddress())) {
 
-                    Log.v("iParked", "Personal beacon: " + visible.getAddress());
-
-                    /** If beacon is closer than the defined set it's location to null */
+                    /** If beacon is closer than the defined, set it's location to null */
                     if (visible.getDistance() < maxDistance) {
+                        visiblePersonalBeacons.add(visible);
                         if ( !isLocationNull(personalBeacon.getLocation()) ) {
-                            Log.v("iParked", "beacon is close, location not null");
-                            visiblePersonalBeacons.add(visible);
                             IparkedApp.mDbHelper.updateBeaconLocation(visible);
-                        } else {
-                            Log.v("iParked", "beacon is close, location is null");
+                            returnLocation();
                         }
-
                     }
 
-                    /** If beacon is visible but not in range we need to set its location */
+                    /** If personal beacon is visible but not nearby we need to set its location */
                     else {
 
                         if ( isLocationNull(personalBeacon.getLocation()) ) {
-
-                            Log.v("iParked", "beacon is far, location is null");
-
                             personalBeacon.setLocation(getLocation());
                             IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                            returnLocation();
 
-                            Log.v("iParked", getLocation().toString());
-
-                        } else {
-                            Log.v("iParked", "beacon is far, location not null");
                         }
                     }
-                }
-
-                /** Beacon is not personal and should be added to list */
-                else {
-                    Log.v("iParked", "Non personal beacon: " + visible.getAddress());
-                    beaconList.add(visible);
                 }
             }
         }
 
         /** Don't do anything if lists are still not initialized */
         if (personalBeaconList == null || visiblePersonalBeacons == null) {
+            returnNearbyBeacons();
             return;
         }
 
         /** Search if personal beacon stopped being visible */
-        for (Beacon visiblePersonalBeacon : visiblePersonalBeacons) {
+        for (Beacon personalBeacon : personalBeaconList) {
             boolean found = false;
 
-            for (Beacon personalBeacon : personalBeaconList) {
+            for (Beacon visiblePersonalBeacon : visiblePersonalBeacons) {
                 if (personalBeacon.getAddress().equals(visiblePersonalBeacon.getAddress())) {
                     found = true;
+                    break;
                 }
             }
 
             if (!found) {
-                if ( isLocationNull(visiblePersonalBeacon.getLocation()) ) {
-                    visiblePersonalBeacon.setLocation(getLocation());
+                if ( isLocationNull(personalBeacon.getLocation()) ) {
+                    personalBeacon.setLocation(getLocation());
+                    IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                    returnLocation();
                 }
             }
         }
-
+        returnNearbyBeacons();
     }
 
     /** Helper function that checks if location is null */
     private boolean isLocationNull(Location location) {
-        return location.getLatitude() == 0 && location.getLongitude() == 0;
+        return abs(location.getLatitude()) <= 0.01 && abs(location.getLongitude()) <= 0.01;
     }
 
     /** Checks and returns beacon location */
@@ -213,21 +210,20 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             return null;
         }
 
-        Location location;
         mGoogleApiClient.connect();
         do {
-            location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        } while (location == null);
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        } while (mLastLocation == null);
         mGoogleApiClient.disconnect();
 
-        return location;
+        return mLastLocation;
     }
 
     public void returnNearbyBeacons() {
 
         /** Broadcasts intent containing the list of nearby beacons */
         Intent beaconListIntent = new Intent("com.dsd2016.iparked_android.return_beacons");
-        beaconListIntent.putParcelableArrayListExtra("BeaconList", beaconList);
+        beaconListIntent.putParcelableArrayListExtra("beaconList", beaconList);
         sendBroadcast(beaconListIntent);
 
 
@@ -237,7 +233,8 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
         /** Broadcasts intent containing the the last location */
         Intent lastLocationIntent = new Intent("com.dsd2016.iparked_android.return_location");
-        lastLocationIntent.putExtra("location",mLastLocation);
+        lastLocationIntent.putExtra("latitude", mLastLocation.getLatitude());
+        lastLocationIntent.putExtra("longitude", mLastLocation.getLongitude());
         sendBroadcast(lastLocationIntent);
     }
 
