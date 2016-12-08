@@ -151,7 +151,6 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                         visiblePersonalBeacons.add(visible);
                         if ( !isLocationNull(personalBeacon.getLocation()) ) {
                             IparkedApp.mDbHelper.updateBeaconLocation(visible);
-                            returnLocation();
                         }
                     }
 
@@ -161,8 +160,6 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                         if ( isLocationNull(personalBeacon.getLocation()) ) {
                             personalBeacon.setLocation(getLocation());
                             IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
-                            returnLocation();
-
                         }
                     }
                 }
@@ -171,6 +168,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
         /** Don't do anything if lists are still not initialized */
         if (personalBeaconList == null || visiblePersonalBeacons == null) {
+            returnLocation();
             returnNearbyBeacons();
             return;
         }
@@ -190,10 +188,10 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                 if ( isLocationNull(personalBeacon.getLocation()) ) {
                     personalBeacon.setLocation(getLocation());
                     IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
-                    returnLocation();
                 }
             }
         }
+        returnLocation();
         returnNearbyBeacons();
     }
 
