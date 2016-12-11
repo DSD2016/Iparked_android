@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -20,11 +22,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
+import com.dsd2016.iparked_android.myClasses.RestCommunicator;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,6 +46,9 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +64,85 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
     private Map<String, Marker> markers;
+    Bitmap floorMap;
+    LatLng floorLocation;
+    String json = "{\n" +
+            "\t\"id\": 1,\n" +
+            "\t\"user_id\": 1,\n" +
+            "\t\"name\": \"garage1\",\n" +
+            "\t\"latitude\": 45.8007,\n" +
+            "\t\"longitude\": 15.971215,\n" +
+            "\t\"num_floors\": 2,\n" +
+            "\t\"garage_capacity\": 500,\n" +
+            "\t\"type\": \"indoor\",\n" +
+            "\t\"UUID\": \"74278bda-b644-4520-8f0c-720eaf059935\",\n" +
+            "\t\"city\": \"Zagreb\",\n" +
+            "\t\"garage_timestamp\": \"2001-01-01 00:00:00\",\n" +
+            "\t\"floors\": [{\n" +
+            "\t\t\"id\": 1,\n" +
+            "\t\t\"garage_id\": 1,\n" +
+            "\t\t\"name\": \"floor1\",\n" +
+            "\t\t\"latitude\": 71.7111949, \n" +
+            "\t\t\"longitude\": -42.6001872,\n" +
+            "\t\t\"angle\": 87,\n" +
+            "\t\t\"size_X\": 31,\n" +
+            "\t\t\"size_Y\": 62,\n" +
+            "\t\t\"zoom_level\": 19,\n" +
+            "\t\t\"floor_plan\": \"\\/api\\/floorplan\\/1\",\n" +
+            "\t\t\"floor_capacity\": 250,\n" +
+            "\t\t\"major_number\": 65504,\n" +
+            "\t\t\"floor_timestamp\": \"2001-01-01 00:00:00\",\n" +
+            "\t\t\"beacons\": [{\n" +
+            "\t\t\t\"id\": 1,\n" +
+            "\t\t\t\"floor_id\": 1,\n" +
+            "\t\t\t\"name\": \"HMSoft1\",\n" +
+            "\t\t\t\"latitude\": 45.4,\n" +
+            "\t\t\t\"longitude\": 15.4,\n" +
+            "\t\t\t\"minor_number\": 5,\n" +
+            "\t\t\t\"bluetooth_adress\": \"20:C3:8F:F2:C0:66\"\n" +
+            "\t\t}, {\n" +
+            "\t\t\t\"id\": 2,\n" +
+            "\t\t\t\"floor_id\": 1,\n" +
+            "\t\t\t\"name\": \"HMSoft2\",\n" +
+            "\t\t\t\"latitude\": 45.6,\n" +
+            "\t\t\t\"longitude\": 15.6,\n" +
+            "\t\t\t\"minor_number\": 6,\n" +
+            "\t\t\t\"bluetooth_adress\": \"B4:99:4C:52:7F:31\"\n" +
+            "\t\t}]\n" +
+            "\t}, {\n" +
+            "\t\t\"id\": 2,\n" +
+            "\t\t\"garage_id\": 1,\n" +
+            "\t\t\"name\": \"floor2\",\n" +
+            "\t\t\"latitude\": 45.8007,\n" +
+            "\t\t\"longitude\": 15.971215,\n" +
+            "\t\t\"angle\": 87,\n" +
+            "\t\t\"size_X\": 31,\n" +
+            "\t\t\"size_Y\": 62,\n" +
+            "\t\t\"zoom_level\": 19,\n" +
+            "\t\t\"floor_plan\": \"\\/api\\/floorplan\\/2\",\n" +
+            "\t\t\"floor_capacity\": 250,\n" +
+            "\t\t\"major_number\": 2,\n" +
+            "\t\t\"floor_timestamp\": \"2001-01-01 00:00:00\",\n" +
+            "\t\t\"beacons\": [{\n" +
+            "\t\t\t\"id\": 3,\n" +
+            "\t\t\t\"floor_id\": 2,\n" +
+            "\t\t\t\"name\": \"beacon3\",\n" +
+            "\t\t\t\"latitude\": 45.4,\n" +
+            "\t\t\t\"longitude\": 15.4,\n" +
+            "\t\t\t\"minor_number\": 3,\n" +
+            "\t\t\t\"bluetooth_adress\": \"89:FA:77:3A:55:22:91\"\n" +
+            "\t\t}, {\n" +
+            "\t\t\t\"id\": 4,\n" +
+            "\t\t\t\"floor_id\": 2,\n" +
+            "\t\t\t\"name\": \"beacon4\",\n" +
+            "\t\t\t\"latitude\": 45.6,\n" +
+            "\t\t\t\"longitude\": 15.6,\n" +
+            "\t\t\t\"minor_number\": 4,\n" +
+            "\t\t\t\"bluetooth_adress\": \"89:FA:77:3A:55:22:95\"\n" +
+            "\t\t}]\n" +
+            "\t}]\n" +
+            "}";
+
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
 
@@ -157,11 +249,79 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                 .show();
     }
 
+    private void getGarage(){
+
+
+        String url ="http://iparked-api.sytes.net/api/id/1";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Gson gson = new Gson();
+                        Garage garage = gson.fromJson(json, Garage.class);
+                        int d = 2;
+                        //floorMap = garage.getPlan(1, getContext());
+                        floorLocation = garage.getFloorLocation(1);
+                        String url ="http://iparked-api.sytes.net/api/floorplan/" + 1;
+                        final Bitmap[] bmp = new Bitmap[1];
+                        ImageRequest request = new ImageRequest(url,
+                                new Response.Listener<Bitmap>() {
+                                    @Override
+                                    public void onResponse(Bitmap bitmap) {
+                                        bmp[0] = bitmap;
+                                        GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
+                                                .image(BitmapDescriptorFactory.fromBitmap(bmp[0]))
+                                                .position(floorLocation, 31, 62)
+                                                .bearing(90);
+                                        map.addGroundOverlay(ferParkingMap);
+                                    }
+                                }, 0, 0, null,null,
+                                new Response.ErrorListener() {
+                                    public void onErrorResponse(VolleyError error) {
+                                        bmp[0] = null;
+                                    }
+                                });
+// Access the RequestQueue through your singleton class.
+                        RestCommunicator.getInstance(getContext()).addToRequestQueue(request);
+
+                        MarkerOptions markerOptions = new MarkerOptions();
+                        markerOptions.position(new LatLng(71.711230, -42.599863));
+                        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
+                        MarkerOptions markerOptions2 = new MarkerOptions();
+                        markerOptions2.position(new LatLng(71.711230, -42.600464));
+                        markerOptions2.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
+                        MarkerOptions markerOptions3 = new MarkerOptions();
+                        markerOptions3.position(new LatLng(71.7111949, -42.6001872));
+                        markerOptions3.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_car));
+                        markerOptions3.title("Santa parked his sleigh here");
+                        map.addMarker(markerOptions);
+                        map.addMarker(markerOptions2);
+                        map.addMarker(markerOptions3);
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(floorLocation,19));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getContext(), error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        RestCommunicator.getInstance(getContext()).addToRequestQueue(stringRequest);
+
+
+    }
     private void modifyMap(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(true);
         MapsInitializer.initialize(this.getContext());
+
         myLocationProvider = new MyLocationProvider(getContext(), this);
+        floorLocation = new LatLng(20, 20);
+        getGarage();
+
+
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { }
     }
 
@@ -227,12 +387,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     public void onGotLastLocation(Location location) {
         LatLng fer_parking = new LatLng(45.800700, 15.971215);
 
-        GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.iparked_garage_fer))
-                .position(fer_parking, 31, 62)
-                .bearing(87);
-        map.clear();
-        map.addGroundOverlay(ferParkingMap);
+
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
         }

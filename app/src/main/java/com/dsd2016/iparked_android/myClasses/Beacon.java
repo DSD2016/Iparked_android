@@ -7,6 +7,7 @@ import android.os.Parcelable;
 
 public class Beacon implements Parcelable{
 
+
     private int major;
     private int minor;
     private String name;

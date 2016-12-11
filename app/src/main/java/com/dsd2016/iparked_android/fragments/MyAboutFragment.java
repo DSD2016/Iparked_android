@@ -23,8 +23,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.R;
+import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.RestCommunicator;
+import com.google.gson.Gson;
 
 
 public class MyAboutFragment extends Fragment{
@@ -57,7 +59,7 @@ public class MyAboutFragment extends Fragment{
             @Override
             public void onClick(View view) {
 
-                String url ="http://www.google.com";
+                String url ="http://iparked-api.sytes.net/api/id/1";
 
                 RequestQueue queue = RestCommunicator.getInstance(getContext()).
                         getRequestQueue();
@@ -66,6 +68,9 @@ public class MyAboutFragment extends Fragment{
                             @Override
                             public void onResponse(String response) {
                                txt_res.setText(response);
+                                Gson gson = new Gson();
+                                Garage garage = gson.fromJson(response, Garage.class);
+                                int d = 2;
                             }
                         },
                         new Response.ErrorListener() {
@@ -123,7 +128,7 @@ public class MyAboutFragment extends Fragment{
         public void onReceive(Context context, Intent intent) {
             Log.v("iParked", "Return beacons");
             Location mylocation = intent.getExtras().getParcelable("location");
-            Toast.makeText(context,String.valueOf(mylocation.getLatitude()), Toast.LENGTH_SHORT).show();
+           // Toast.makeText(context,String.valueOf(mylocation.getLatitude()), Toast.LENGTH_SHORT).show();
 
         }
     };
