@@ -30,6 +30,7 @@ import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.dsd2016.iparked_android.myClasses.Floor;
 import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.JsonBeacon;
@@ -188,7 +189,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                         Garage garage = gson.fromJson(response, Garage.class);
                         //floorMap = garage.getPlan(1, getContext());
                         floorLocation = garage.getFloorLocation(1);
-                        apiBeacons = garage.getFloors().get(0).getBeacons();
+
                         String url ="http://iparked-api.sytes.net/api/floorplan/" + 1;
                         ImageRequest request = new ImageRequest(url,
                                 new Response.Listener<Bitmap>() {
@@ -201,7 +202,6 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                                                 .image(BitmapDescriptorFactory.fromBitmap(floorMap))
                                                 .position(fer_parking, 31, 62)
                                                 .bearing(87);
-                                        map.clear();
                                         map.addGroundOverlay(ferParkingMap);
                                     }
                                 }, 0, 0, null,null,
@@ -212,14 +212,15 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                                 });
 // Access the RequestQueue through your singleton class.
                         RestCommunicator.getInstance(getContext()).addToRequestQueue(request);
-
-                        for (JsonBeacon b:apiBeacons){
-                            MarkerOptions markerOptions = new MarkerOptions();
-                            markerOptions.position(new LatLng(b.getLatitude(),b.getLongitude()));
-                            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
-                            markerOptions.title(b.getName());
-                            markerOptions.snippet("Beacon "+b.getMinor_number()+"@ Floor "+b.getFloor_id());
-                            map.addMarker(markerOptions);
+                        for (Floor f:garage.getFloors()){
+                            for (JsonBeacon b:f.getBeacons()){
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.position(new LatLng(b.getLatitude(),b.getLongitude()));
+                                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
+                                markerOptions.title(b.getName());
+                                markerOptions.snippet("Beacon "+b.getMinor_number()+"@ Floor "+b.getFloor_id());
+                                map.addMarker(markerOptions);
+                            }
                         }
 
                         MarkerOptions markerOptions3 = new MarkerOptions();
