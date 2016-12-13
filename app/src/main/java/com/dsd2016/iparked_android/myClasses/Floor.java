@@ -51,4 +51,8 @@ public class Floor {
         return longitude;
 
     }
+
+    public ArrayList<JsonBeacon> getBeacons() {
+        return beacons;
+    }
 }

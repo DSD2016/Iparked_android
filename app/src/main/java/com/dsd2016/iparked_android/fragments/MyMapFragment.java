@@ -32,6 +32,7 @@ import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
 import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
+import com.dsd2016.iparked_android.myClasses.JsonBeacon;
 import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
 import com.dsd2016.iparked_android.myClasses.RestCommunicator;
@@ -66,6 +67,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     private Map<String, Marker> markers;
     Bitmap floorMap;
     LatLng floorLocation;
+    ArrayList<JsonBeacon> apiBeacons;
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
@@ -186,16 +188,20 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                         Garage garage = gson.fromJson(response, Garage.class);
                         //floorMap = garage.getPlan(1, getContext());
                         floorLocation = garage.getFloorLocation(1);
+                        apiBeacons = garage.getFloors().get(0).getBeacons();
                         String url ="http://iparked-api.sytes.net/api/floorplan/" + 1;
                         ImageRequest request = new ImageRequest(url,
                                 new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap bitmap) {
                                         floorMap = bitmap;
+                                        LatLng fer_parking = new LatLng(45.800700, 15.971215);
+
                                         GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
                                                 .image(BitmapDescriptorFactory.fromBitmap(floorMap))
-                                                .position(floorLocation, 31, 62)
-                                                .bearing(90);
+                                                .position(fer_parking, 31, 62)
+                                                .bearing(87);
+                                        map.clear();
                                         map.addGroundOverlay(ferParkingMap);
                                     }
                                 }, 0, 0, null,null,
@@ -207,20 +213,21 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
 // Access the RequestQueue through your singleton class.
                         RestCommunicator.getInstance(getContext()).addToRequestQueue(request);
 
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.position(new LatLng(71.711230, -42.599863));
-                        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
-                        MarkerOptions markerOptions2 = new MarkerOptions();
-                        markerOptions2.position(new LatLng(71.711230, -42.600464));
-                        markerOptions2.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
+                        for (JsonBeacon b:apiBeacons){
+                            MarkerOptions markerOptions = new MarkerOptions();
+                            markerOptions.position(new LatLng(b.getLatitude(),b.getLongitude()));
+                            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_beacons));
+                            markerOptions.title(b.getName());
+                            markerOptions.snippet("Beacon "+b.getMinor_number()+"@ Floor "+b.getFloor_id());
+                            map.addMarker(markerOptions);
+                        }
+
                         MarkerOptions markerOptions3 = new MarkerOptions();
-                        markerOptions3.position(new LatLng(71.7111949, -42.6001872));
+                        markerOptions3.position(new LatLng(45.800700, 15.971215));
                         markerOptions3.icon(BitmapDescriptorFactory.fromResource(R.drawable.christmas_car));
                         markerOptions3.title("Santa parked his sleigh here");
-                        map.addMarker(markerOptions);
-                        map.addMarker(markerOptions2);
                         map.addMarker(markerOptions3);
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(floorLocation, 19);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(45.800700, 15.971215), 19);
                         map.animateCamera(cameraUpdate);
                     }
                 },

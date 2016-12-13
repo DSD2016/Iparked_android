@@ -32,4 +32,24 @@ public class JsonBeacon {
         this.minor_number = minor_number;
         this.bluetooth_address = bluetooth_address;
     }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public int getFloor_id() {
+        return floor_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMinor_number() {
+        return minor_number;
+    }
 }
