@@ -52,4 +52,17 @@ public class JsonBeacon {
     public int getMinor_number() {
         return minor_number;
     }
+    public String getBluetooth_address(){ return bluetooth_address;}
+
+    public void setFloor_id(int floor_id) {
+        this.floor_id = floor_id;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 }

@@ -86,4 +86,12 @@ public class Garage {
     public ArrayList<Floor> getFloors() {
         return floors;
     }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
 }

@@ -18,6 +18,7 @@ import android.util.Log;
 
 import com.dsd2016.iparked_android.myClasses.Beacon;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
+import com.dsd2016.iparked_android.myClasses.JsonBeacon;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -30,6 +31,7 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -40,6 +42,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
     private ArrayList<Beacon> beaconList = new ArrayList<>();
     private ArrayList<Beacon> visiblePersonalBeacons = new ArrayList<>();
+    private ArrayList<JsonBeacon> visibleGarageBeacons = new ArrayList<>();
     private BeaconManager beaconManager;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -114,15 +117,21 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         }
 
     }
-
-
     @Override
     public void didRangeBeaconsInRegion(Collection<org.altbeacon.beacon.Beacon> collection, Region region) {
-
+        visibleGarageBeacons.clear();
         beaconList.clear();
         visiblePersonalBeacons.clear();
         ArrayList<Beacon> personalBeaconList = IparkedApp.mDbHelper.getPersonalBeacons();
-
+        Double sumLong=0.0;
+        Double sumLat=0.0;
+        for (org.altbeacon.beacon.Beacon visiblebeacon : collection){
+            for(JsonBeacon b: ((IparkedApp) getApplication()).getJsonBeacon()){
+                if(visiblebeacon.getBluetoothAddress().equals(b.getBluetooth_address())){
+                    visibleGarageBeacons.add(b);
+                }
+            }
+        }
         for (org.altbeacon.beacon.Beacon beacon : collection) {
 
             /** Get beacon information */
@@ -140,6 +149,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             if (personalBeaconList == null) {
                 continue;
             }
+
 
             /** Check if beacon is personal beacon */
             for (Beacon personalBeacon : personalBeaconList) {
@@ -160,6 +170,18 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                         if ( isLocationNull(personalBeacon.getLocation()) ) {
                             personalBeacon.setLocation(getLocation());
                             IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
+                            if(!visibleGarageBeacons.isEmpty()){
+                                ((IparkedApp) getApplication()).getLocationInGarage().setFloor_id(visibleGarageBeacons.get(0).getFloor_id());
+                                for (JsonBeacon b : visibleGarageBeacons){
+                                    sumLong+=b.getLongitude();
+                                    sumLat+=b.getLatitude();
+                                }
+                                ((IparkedApp) getApplication()).getLocationInGarage().setLongitude(sumLong/visibleGarageBeacons.size());
+                                ((IparkedApp) getApplication()).getLocationInGarage().setLatitude(sumLat/visibleGarageBeacons.size());
+                            }
+                            else{
+                                ((IparkedApp) getApplication()).setLocationInGarage(null);
+                            }
                         }
                     }
                 }
