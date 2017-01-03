@@ -58,7 +58,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private Location mLastLocation;
     private double maxDistance = 1.5;
 
-    private String url ="http://iparked-api.sytes.net/api/id/1";
+    private String url ="http://iparked-api.sytes.net/api/uuid/";
     public static BeaconDbHelper mDbHelper;
     private JsonBeacon locationInGarage;
     private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();;
