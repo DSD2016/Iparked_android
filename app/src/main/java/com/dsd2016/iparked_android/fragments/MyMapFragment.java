@@ -2,6 +2,7 @@ package com.dsd2016.iparked_android.fragments;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -257,6 +258,15 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                 if (beacons == null) {
                     return;
                 }
+
+//                LatLng latLng1 = new LatLng(((IparkedApp)((Activity) context).getApplication()).getGarageLocation().getLatitude(), ((IparkedApp)((Activity) context).getApplication()).getGarageLocation().getLongitude());
+//                MarkerOptions markerOptions = new MarkerOptions();
+//                markerOptions.position(latLng1);
+//                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
+//                markerOptions.title("Garage");
+//                markerOptions.snippet("Parked on 12/11/2016 12:12:12");
+//                Marker newMarker = map.addMarker(markerOptions);
+//                markers.put("1:1", newMarker);
 
                 /** Add beacons from database to map */
                 for (Beacon beacon : beacons) {

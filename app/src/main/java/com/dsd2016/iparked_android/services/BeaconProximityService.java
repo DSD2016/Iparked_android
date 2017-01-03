@@ -15,13 +15,23 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.myClasses.Beacon;
+import com.dsd2016.iparked_android.myClasses.BeaconDbHelper;
+import com.dsd2016.iparked_android.myClasses.Floor;
+import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.JsonBeacon;
+import com.dsd2016.iparked_android.myClasses.RestCommunicator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -47,6 +57,13 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private double maxDistance = 1.5;
+
+    private String url ="http://iparked-api.sytes.net/api/id/1";
+    public static BeaconDbHelper mDbHelper;
+    private JsonBeacon locationInGarage;
+    private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();;
+    private Location garageLocation = new Location("");
+    Garage garage;
 
     public BeaconProximityService() {
         super();
@@ -117,16 +134,50 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         }
 
     }
+
+    public void getJsonData(String garageUUID){
+        locationInGarage = new JsonBeacon();
+        jsonBeacon.clear();
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url + garageUUID, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Gson gson = new Gson();
+                garage = gson.fromJson(response, Garage.class);
+                garageLocation.setLatitude(garage.getLatitude());
+                garageLocation.setLongitude(garage.getLongitude());
+                for (Floor f:garage.getFloors()){
+                    for (JsonBeacon b:f.getBeacons()){
+                        jsonBeacon.add(b);
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        RestCommunicator.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+    }
+
     @Override
     public void didRangeBeaconsInRegion(Collection<org.altbeacon.beacon.Beacon> collection, Region region) {
         visibleGarageBeacons.clear();
         beaconList.clear();
         visiblePersonalBeacons.clear();
         ArrayList<Beacon> personalBeaconList = IparkedApp.mDbHelper.getPersonalBeacons();
-        Double sumLong=0.0;
-        Double sumLat=0.0;
+        double sumLong=0.0;
+        double sumLat=0.0;
+
+        if(garage != null && !collection.isEmpty()){
+            if(!garage.getUuid().equals(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString())){
+                getJsonData(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString());
+            }
+        }
+        else if (!collection.isEmpty()){
+            getJsonData(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString());
+        }
         for (org.altbeacon.beacon.Beacon visiblebeacon : collection){
-            for(JsonBeacon b: ((IparkedApp) getApplication()).getJsonBeacon()){
+            for(JsonBeacon b: jsonBeacon){
                 if(visiblebeacon.getBluetoothAddress().equals(b.getBluetooth_address())){
                     visibleGarageBeacons.add(b);
                 }
@@ -168,20 +219,29 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                     else {
 
                         if ( isLocationNull(personalBeacon.getLocation()) ) {
-                            personalBeacon.setLocation(getLocation());
-                            IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
                             if(!visibleGarageBeacons.isEmpty()){
                                 ((IparkedApp) getApplication()).getLocationInGarage().setFloor_id(visibleGarageBeacons.get(0).getFloor_id());
                                 for (JsonBeacon b : visibleGarageBeacons){
                                     sumLong+=b.getLongitude();
                                     sumLat+=b.getLatitude();
                                 }
-                                ((IparkedApp) getApplication()).getLocationInGarage().setLongitude(sumLong/visibleGarageBeacons.size());
-                                ((IparkedApp) getApplication()).getLocationInGarage().setLatitude(sumLat/visibleGarageBeacons.size());
+                                double Long = sumLong/visibleGarageBeacons.size();
+                                double Lat = sumLat/visibleGarageBeacons.size();
+                                Location location = new Location("");
+                                location.setLongitude(Long);
+                                location.setLatitude(Lat);
+                                personalBeacon.setLocation(location);
+                                //((IparkedApp) getApplication()).getLocationInGarage().setLongitude(sumLong/visibleGarageBeacons.size());
+                                //((IparkedApp) getApplication()).getLocationInGarage().setLatitude(sumLat/visibleGarageBeacons.size());
                             }
                             else{
-                                ((IparkedApp) getApplication()).setLocationInGarage(null);
+                                //((IparkedApp) getApplication()).setLocationInGarage(null);
                             }
+
+                            if ( isLocationNull(personalBeacon.getLocation()) ) {
+                                personalBeacon.setLocation(getLocation());
+                            }
+                            IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
                         }
                     }
                 }
@@ -208,7 +268,28 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
             if (!found) {
                 if ( isLocationNull(personalBeacon.getLocation()) ) {
-                    personalBeacon.setLocation(getLocation());
+                    if(!visibleGarageBeacons.isEmpty()){
+                        ((IparkedApp) getApplication()).getLocationInGarage().setFloor_id(visibleGarageBeacons.get(0).getFloor_id());
+                        for (JsonBeacon b : visibleGarageBeacons){
+                            sumLong+=b.getLongitude();
+                            sumLat+=b.getLatitude();
+                        }
+                        double Long = sumLong/visibleGarageBeacons.size();
+                        double Lat = sumLat/visibleGarageBeacons.size();
+                        Location location = new Location("");
+                        location.setLongitude(Long);
+                        location.setLatitude(Lat);
+                        personalBeacon.setLocation(location);
+                        //((IparkedApp) getApplication()).getLocationInGarage().setLongitude(sumLong/visibleGarageBeacons.size());
+                        //((IparkedApp) getApplication()).getLocationInGarage().setLatitude(sumLat/visibleGarageBeacons.size());
+                    }
+                    else{
+                        //((IparkedApp) getApplication()).setLocationInGarage(null);
+                    }
+
+                    if ( isLocationNull(personalBeacon.getLocation()) ) {
+                        personalBeacon.setLocation(getLocation());
+                    }
                     IparkedApp.mDbHelper.updateBeaconLocation(personalBeacon);
                 }
             }

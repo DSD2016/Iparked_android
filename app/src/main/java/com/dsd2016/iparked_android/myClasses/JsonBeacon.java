@@ -33,6 +33,16 @@ public class JsonBeacon {
         this.bluetooth_address = bluetooth_address;
     }
 
+    public JsonBeacon() {
+        this.id = 0;
+        this.floor_id = 0;
+        this.name = null;
+        this.latitude = null;
+        this.longitude = null;
+        this.minor_number = 0;
+        this.bluetooth_address = null;
+    }
+
     public Double getLatitude() {
         return latitude;
     }

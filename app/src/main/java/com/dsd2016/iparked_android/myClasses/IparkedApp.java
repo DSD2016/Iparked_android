@@ -19,12 +19,13 @@ public class IparkedApp extends Application {
     public static BeaconDbHelper mDbHelper;
     private JsonBeacon locationInGarage;
     private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();;
-    private Location garageLocation;
+    private Location garageLocation = new Location("");
+
     @Override
     public void onCreate() {
         super.onCreate();
         // Required initialization logic here!
-        locationInGarage = null;
+        locationInGarage = new JsonBeacon();
         mDbHelper=new BeaconDbHelper(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override

@@ -16,7 +16,7 @@ public class Floor {
     private String name;
     private Double longitude;
     private Double latitude;
-    private int angle;
+    private double angle;
     private int size_X;
     private int size_Y;
     private int zoom_level;
@@ -26,7 +26,7 @@ public class Floor {
     private String floor_timestamp;
     private ArrayList<JsonBeacon> beacons;
 
-    public Floor(int id, int garage_id, String name, Double longitude, Double latitude, int angle, int size_X, int size_Y, int zoom_level, String floor_plan, int floor_capacity, int major_number, String floor_timestamp, ArrayList<JsonBeacon> beacons) {
+    public Floor(int id, int garage_id, String name, Double longitude, Double latitude, double angle, int size_X, int size_Y, int zoom_level, String floor_plan, int floor_capacity, int major_number, String floor_timestamp, ArrayList<JsonBeacon> beacons) {
         this.id = id;
         this.garage_id = garage_id;
         this.name = name;
