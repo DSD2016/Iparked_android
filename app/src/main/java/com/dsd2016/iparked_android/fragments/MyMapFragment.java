@@ -67,6 +67,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     protected GoogleMap googleMap, map;
     MyLocationProvider myLocationProvider;
     private Map<String, Marker> markers;
+    private Marker myLocationMarker;
     Bitmap floorMap;
     LatLng floorLocation;
     ArrayList<JsonBeacon> apiBeacons;
@@ -251,6 +252,9 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
         @Override
         public void onReceive(Context context, Intent intent) {
 
+            double latitude = intent.getDoubleExtra("latitude", 0.0);
+            double longitude = intent.getDoubleExtra("longitude", 0.0);
+
             if (map != null) {
                 ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
 
@@ -259,14 +263,15 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                     return;
                 }
 
-//                LatLng latLng1 = new LatLng(((IparkedApp)((Activity) context).getApplication()).getGarageLocation().getLatitude(), ((IparkedApp)((Activity) context).getApplication()).getGarageLocation().getLongitude());
-//                MarkerOptions markerOptions = new MarkerOptions();
-//                markerOptions.position(latLng1);
-//                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
-//                markerOptions.title("Garage");
-//                markerOptions.snippet("Parked on 12/11/2016 12:12:12");
-//                Marker newMarker = map.addMarker(markerOptions);
-//                markers.put("1:1", newMarker);
+                if(myLocationMarker != null){
+                    myLocationMarker.remove();
+                }
+                LatLng latLng1 = new LatLng(latitude, longitude);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng1);
+                markerOptions.title("Garage");
+                markerOptions.snippet("Your location!");
+                myLocationMarker = map.addMarker(markerOptions);
 
                 /** Add beacons from database to map */
                 for (Beacon beacon : beacons) {
@@ -278,7 +283,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                     } else if ((abs(beacon.getLocation().getLatitude()) > 0.01 || abs(beacon.getLocation().getLongitude()) > 0.01) && marker == null) {
                         LatLng latLng = new LatLng(beacon.getLocation().getLatitude(), beacon.getLocation().getLongitude());
 
-                        MarkerOptions markerOptions = new MarkerOptions();
+                        markerOptions = new MarkerOptions();
                         markerOptions.position(latLng);
                         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
                         markerOptions.title(beacon.getName());

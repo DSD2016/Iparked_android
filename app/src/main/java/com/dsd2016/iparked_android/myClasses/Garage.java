@@ -18,9 +18,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by ricca on 11/12/2016.
- */
 
 public class Garage {
 

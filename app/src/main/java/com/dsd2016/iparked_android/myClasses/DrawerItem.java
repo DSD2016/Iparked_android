@@ -1,8 +1,5 @@
 package com.dsd2016.iparked_android.myClasses;
 
-/**
- * Created by Saeedek on 03-Dec-16.
- */
 
 public class DrawerItem {
     String ItemName;

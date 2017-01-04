@@ -13,9 +13,6 @@ import com.dsd2016.iparked_android.R;
 
 import java.util.List;
 
-/**
- * Created by Saeedek on 03-Dec-16.
- */
 
 public class MyDrawerAdapter extends ArrayAdapter<DrawerItem> {
 
