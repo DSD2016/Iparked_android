@@ -1,7 +1,6 @@
 package com.dsd2016.iparked_android.fragments;
 
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,11 +33,10 @@ import java.util.ArrayList;
  */
 public class MyPairingFragment extends ListFragment implements View.OnClickListener {
 
-    private static final String TAG = "PAIRING_FRAGMENT";
     private ListView listView;
     BeaconListAdapter beaconListAdapter;
-    private ArrayList<Beacon> storedbeaconList = new ArrayList<Beacon>(1);
-    private ArrayList<Beacon> visiblebeaconList = new ArrayList<Beacon>(1);
+    private ArrayList<Beacon> storedbeaconList = new ArrayList<>(1);
+    private ArrayList<Beacon> visiblebeaconList = new ArrayList<>(1);
 
 
 
@@ -90,8 +88,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
         /**
          * This method is called by OS when new broadcast is received. Here we are extracting
          * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
-         * @param context
-         * @param intent
          */
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -132,11 +128,6 @@ public class MyPairingFragment extends ListFragment implements View.OnClickListe
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(broadCastNewMessage);
-    }
-
-
-    public static MyPairingFragment newInstance() {
-        return new MyPairingFragment();
     }
 
     /**

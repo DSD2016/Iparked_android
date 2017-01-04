@@ -23,7 +23,7 @@ public class RestCommunicator {
         mImageLoader = new ImageLoader(mRequestQueue,
                 new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap>
-                            cache = new LruCache<String, Bitmap>(20);
+                            cache = new LruCache<>(20);
 
                     @Override
                     public Bitmap getBitmap(String url) {
@@ -50,16 +50,9 @@ public class RestCommunicator {
         }
         return mRequestQueue;
     }
+
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
     }
-
-    public ImageLoader getImageLoader() {
-        return mImageLoader;
-    }
-
-
-
-
 
 }

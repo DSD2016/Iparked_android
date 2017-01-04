@@ -4,10 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -24,7 +22,8 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                     BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS + " TEXT," +
                     BeaconDatabaseSchema.Beacons.COLUMN_STORED + " INTEGER," +
                     BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT + " DOUBLE," +
-                    BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON + " DOUBLE" +
+                    BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON + " DOUBLE," +
+                    BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID + " INTEGER" +
                     " )";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -42,9 +41,10 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
     private static int INDEX_STORED;
     private static int INDEX_LOCATION_LON;
     private static int INDEX_LOCATION_LAT;
+    private static int INDEX_FLOOR_ID;
 
 
-    public BeaconDbHelper (Context context) {
+    BeaconDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -68,7 +68,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         Cursor cursor = read();
 
         INDEX_ID = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons._ID);
-        INDEX_NAME = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_MINOR);
+        INDEX_NAME = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_NAME);
         INDEX_UUID = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_UUID);
         INDEX_MAJOR = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_MAJOR);
         INDEX_MINOR = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_MINOR);
@@ -77,6 +77,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
         INDEX_STORED = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_STORED);
         INDEX_LOCATION_LAT = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT);
         INDEX_LOCATION_LON = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON);
+        INDEX_FLOOR_ID = cursor.getColumnIndex(BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID);
     }
 
     public long insert (String name, int major, int minor, String uuid, String address, Location location) {
@@ -96,6 +97,8 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
             values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON, location.getLongitude());
         }
 
+        values.put(BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID, -1);
+
         return db.insert(BeaconDatabaseSchema.Beacons.TABLE_NAME, null, values);
     }
 
@@ -113,9 +116,10 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                 BeaconDatabaseSchema.Beacons.COLUMN_STORED,
                 BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT,
                 BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON,
+                BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID,
         };
 
-        // TODO fix properly)
+        // TODO fix properly
         return db.query(
                 BeaconDatabaseSchema.Beacons.TABLE_NAME, projection, null, null, null, null, null
         );
@@ -201,7 +205,8 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                     beaconCursor.getString(INDEX_UUID),
                     beaconCursor.getInt(INDEX_STORED),
                     beaconCursor.getString(INDEX_ADDRESS),
-                    location
+                    location,
+                    beaconCursor.getInt(INDEX_FLOOR_ID)
                     );
             personalBeaconList.add(newBeacon);
         } while (beaconCursor.moveToNext());

@@ -2,7 +2,6 @@ package com.dsd2016.iparked_android.fragments;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -23,23 +21,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.myClasses.Beacon;
 import com.dsd2016.iparked_android.myClasses.Floor;
-import com.dsd2016.iparked_android.myClasses.Garage;
 import com.dsd2016.iparked_android.myClasses.IparkedApp;
 import com.dsd2016.iparked_android.myClasses.JsonBeacon;
 import com.dsd2016.iparked_android.myClasses.MyLocationProvider;
 import com.dsd2016.iparked_android.myClasses.OnGotLastLocation;
 import com.dsd2016.iparked_android.myClasses.RestCommunicator;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -49,9 +41,6 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +59,6 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     private Marker myLocationMarker;
     Bitmap floorMap;
     LatLng floorLocation;
-    ArrayList<JsonBeacon> apiBeacons;
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
@@ -131,7 +119,6 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
 
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -141,11 +128,6 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
         mapView.getMapAsync(this);
         return myView;
     }
-
-    public static MyMapFragment newInstance() {
-        return new MyMapFragment();
-    }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -208,9 +190,8 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
         else{
             map.clear();
         }
-
-
     }
+
     private void modifyMap(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(true);
@@ -242,12 +223,36 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
         }
     }
 
+    private void getFloor(int id){
+        String url ="http://iparked-api.sytes.net/api/floorplan/" + id;
+        final Floor floor = IparkedApp.mFloorDbHelper.getFloor(id);
+        ImageRequest request = new ImageRequest(url,
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        floorMap = bitmap;
+                        LatLng parking = new LatLng(floor.getLatitude(), floor.getLongitude());
+
+                        GroundOverlayOptions parkingMap = new GroundOverlayOptions()
+                                .image(BitmapDescriptorFactory.fromBitmap(floorMap))
+                                .position(parking, floor.getSizeX(), floor.getSizeY())
+                                .bearing((int) floor.getAngle());
+                        map.addGroundOverlay(parkingMap);
+                    }
+                }, 0, 0, null,null,
+                new Response.ErrorListener() {
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getContext(), "Error downloading map image", Toast.LENGTH_SHORT).show();
+                        floorMap = null;
+                    }
+                });
+        RestCommunicator.getInstance(getContext()).addToRequestQueue(request);
+    }
+
     private BroadcastReceiver broadCastNewMessage = new BroadcastReceiver() {
         /**
          * This method is called by OS when new broadcast is received. Here we are extracting
          * ArrayList of beacons from parcelable Object and then displaying that list with adapter.
-         * @param context
-         * @param intent
          */
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -258,23 +263,26 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
             if (map != null) {
                 ArrayList<Beacon> beacons = IparkedApp.mDbHelper.getPersonalBeacons();
 
+                if(myLocationMarker != null ){
+                    myLocationMarker.remove();
+                }
+                if (!(abs(longitude) <= 0.01 && abs(latitude) <= 0.01)) {
+                    LatLng latLng1 = new LatLng(latitude, longitude);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(latLng1);
+                    markerOptions.title("You are here!");
+                    myLocationMarker = map.addMarker(markerOptions);
+                }
+
                 /** Check if beacon list is not initialized */
                 if (beacons == null) {
                     return;
                 }
 
-                if(myLocationMarker != null){
-                    myLocationMarker.remove();
-                }
-                LatLng latLng1 = new LatLng(latitude, longitude);
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng1);
-                markerOptions.title("Garage");
-                markerOptions.snippet("Your location!");
-                myLocationMarker = map.addMarker(markerOptions);
-
                 /** Add beacons from database to map */
                 for (Beacon beacon : beacons) {
+
+                    getFloor(beacon.getFloorId());
 
                     Marker marker = markers.get(beacon.getAddress());
                     if (abs(beacon.getLocation().getLatitude()) <= 0.01 && abs(beacon.getLocation().getLongitude()) <= 0.01 && marker != null) {
@@ -283,11 +291,10 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                     } else if ((abs(beacon.getLocation().getLatitude()) > 0.01 || abs(beacon.getLocation().getLongitude()) > 0.01) && marker == null) {
                         LatLng latLng = new LatLng(beacon.getLocation().getLatitude(), beacon.getLocation().getLongitude());
 
-                        markerOptions = new MarkerOptions();
+                        MarkerOptions markerOptions = new MarkerOptions();
                         markerOptions.position(latLng);
                         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.car2));
                         markerOptions.title(beacon.getName());
-                        markerOptions.snippet("Parked on 12/11/2016 12:12:12");
                         Marker newMarker = map.addMarker(markerOptions);
                         markers.put(beacon.getAddress(), newMarker);
                     }
@@ -297,11 +304,8 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     };
 
     public void onGotLastLocation(Location location) {
-        LatLng fer_parking = new LatLng(45.800700, 15.971215);
-
 
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
         }
 
         map.setMyLocationEnabled(true);

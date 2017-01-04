@@ -16,6 +16,7 @@ public class Beacon implements Parcelable{
     private String uuid;
     private String address;
     private Location location;
+    private int floorId;
 
     public Beacon(int major, int minor, String name, String uuid, int stored, String address) {
         this.major = major;
@@ -25,9 +26,10 @@ public class Beacon implements Parcelable{
         this.stored = stored;
         this.address = address;
         this.location = null;
+        this.floorId = -1;
     }
 
-    public Beacon(int major, int minor, String name, String uuid, int stored, String address, Location location) {
+    public Beacon(int major, int minor, String name, String uuid, int stored, String address, Location location, int floorId) {
         this.major = major;
         this.minor = minor;
         this.name = name;
@@ -35,9 +37,10 @@ public class Beacon implements Parcelable{
         this.stored = stored;
         this.address = address;
         this.location = location;
+        this.floorId = floorId;
     }
 
-    public Beacon(int major, int minor, String name, String uuid, double distance, String address) {
+    public Beacon(int major, int minor, String name, String uuid, double distance, String address, int floorId) {
         this.major = major;
         this.minor = minor;
         this.name = name;
@@ -46,6 +49,7 @@ public class Beacon implements Parcelable{
         this.stored = 0;
         this.address = address;
         this.location = null;
+        this.floorId = floorId;
     }
 
     private Beacon(Parcel in) {
@@ -78,13 +82,22 @@ public class Beacon implements Parcelable{
 
     public double getDistance() {return distance;}
 
-    int getStored(){
+    public int getStored(){
         return this.stored;
     }
 
     public void setLocation(Location location) { this.location = location; }
 
     public Location getLocation() { return  this.location; }
+
+    public int getFloorId(){
+        return this.floorId;
+    }
+
+    public void setFloorId(int floorId){
+        this.floorId = floorId;
+    }
+
 
     @Override
     public void writeToParcel(Parcel out, int flags) {

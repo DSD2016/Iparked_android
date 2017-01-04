@@ -18,8 +18,6 @@ import android.widget.Toast;
 import com.dsd2016.iparked_android.R;
 import com.dsd2016.iparked_android.services.BeaconProximityService;
 
-import java.util.List;
-
 
 public class SplashActivity extends AppCompatActivity {
 

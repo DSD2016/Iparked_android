@@ -17,8 +17,9 @@ public class IparkedApp extends Application {
 
     String url ="http://iparked-api.sytes.net/api/id/1";
     public static BeaconDbHelper mDbHelper;
+    public static FloorDbHelper mFloorDbHelper;
     private JsonBeacon locationInGarage;
-    private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();;
+    private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();
     private Location garageLocation = new Location("");
 
     @Override
@@ -26,7 +27,8 @@ public class IparkedApp extends Application {
         super.onCreate();
         // Required initialization logic here!
         locationInGarage = new JsonBeacon();
-        mDbHelper=new BeaconDbHelper(getApplicationContext());
+        mDbHelper = new BeaconDbHelper(getApplicationContext());
+        mFloorDbHelper = new FloorDbHelper(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {

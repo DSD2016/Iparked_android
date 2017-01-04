@@ -2,8 +2,8 @@ package com.dsd2016.iparked_android.myClasses;
 
 
 public class DrawerItem {
-    String ItemName;
-    int imgResID;
+    private String ItemName;
+    private int imgResID;
 
     public DrawerItem(String itemName, int imgResID) {
         super();
