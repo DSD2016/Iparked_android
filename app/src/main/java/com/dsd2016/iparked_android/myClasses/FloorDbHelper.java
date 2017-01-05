@@ -7,8 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
-
 public class FloorDbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_ENTRIES =
@@ -22,7 +20,7 @@ public class FloorDbHelper extends SQLiteOpenHelper {
                     FloorDatabaseSchema.Floors.COLUMN_ZOOM_LEVEL + " INTEGER," +
                     FloorDatabaseSchema.Floors.COLUMN_FLOOR_PLAN + " TEXT," +
                     FloorDatabaseSchema.Floors.COLUMN_LOCATION_LAT + " DOUBLE," +
-                    FloorDatabaseSchema.Floors.COLUMN_LOCATION_LON + " DOUBLE," +
+                    FloorDatabaseSchema.Floors.COLUMN_LOCATION_LON + " DOUBLE" +
                     " )";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -49,13 +47,13 @@ public class FloorDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate (SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        //db.execSQL(SQL_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade (SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_ENTRIES);
-        onCreate(db);
+        db.execSQL(SQL_CREATE_ENTRIES);
     }
 
     @Override
@@ -159,7 +157,6 @@ public class FloorDbHelper extends SQLiteOpenHelper {
     }
 
 
-    /** Check if beacon exists in database */
     public Floor getFloor(int id) {
 
         Cursor floorCursor = this.readById(id);

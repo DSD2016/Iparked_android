@@ -26,6 +26,20 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
                     BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID + " INTEGER" +
                     " )";
 
+    private static final String SQL_CREATE_ENTRIES2 =
+            "CREATE TABLE " + FloorDatabaseSchema.Floors.TABLE_NAME + " (" +
+                    FloorDatabaseSchema.Floors._ID + " INTEGER PRIMARY KEY," +
+                    FloorDatabaseSchema.Floors.COLUMN_NAME + " TEXT," +
+                    FloorDatabaseSchema.Floors.COLUMN_MAJOR + " INTEGER," +
+                    FloorDatabaseSchema.Floors.COLUMN_ANGLE + " DOUBLE," +
+                    FloorDatabaseSchema.Floors.COLUMN_SIZE_X + " INTEGER," +
+                    FloorDatabaseSchema.Floors.COLUMN_SIZE_Y + " INTEGER," +
+                    FloorDatabaseSchema.Floors.COLUMN_ZOOM_LEVEL + " INTEGER," +
+                    FloorDatabaseSchema.Floors.COLUMN_FLOOR_PLAN + " TEXT," +
+                    FloorDatabaseSchema.Floors.COLUMN_LOCATION_LAT + " DOUBLE," +
+                    FloorDatabaseSchema.Floors.COLUMN_LOCATION_LON + " DOUBLE" +
+                    " )";
+
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + BeaconDatabaseSchema.Beacons.TABLE_NAME;
     private static final int DATABASE_VERSION = 1;
@@ -51,6 +65,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate (SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_ENTRIES2);
     }
 
     @Override
@@ -168,6 +183,7 @@ public class BeaconDbHelper extends SQLiteOpenHelper {
             values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LAT, 0.0);
             values.put(BeaconDatabaseSchema.Beacons.COLUMN_LOCATION_LON, 0.0);
         }
+        values.put(BeaconDatabaseSchema.Beacons.COLUMN_FLOOR_ID, beacon.getFloorId());
 
         /** Which row to update, based on the title */
         String selection = BeaconDatabaseSchema.Beacons.COLUMN_ADDRESS + " LIKE ?";

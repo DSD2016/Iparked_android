@@ -27,8 +27,8 @@ public class IparkedApp extends Application {
         super.onCreate();
         // Required initialization logic here!
         locationInGarage = new JsonBeacon();
-        mDbHelper = new BeaconDbHelper(getApplicationContext());
         mFloorDbHelper = new FloorDbHelper(getApplicationContext());
+        mDbHelper = new BeaconDbHelper(getApplicationContext());
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {

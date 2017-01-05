@@ -287,6 +287,9 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
     /** Helper function that checks if location is null */
     private boolean isLocationNull(Location location) {
+        if(location == null){
+            return true;
+        }
         return abs(location.getLatitude()) <= 0.01 && abs(location.getLongitude()) <= 0.01;
     }
 
@@ -303,7 +306,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         do {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             i++;
-        } while (mLastLocation == null && i < 10);
+        } while (mLastLocation == null || i < 10);
         mGoogleApiClient.disconnect();
 
         return mLastLocation;
@@ -356,14 +359,12 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
             returnLocation();
         }
-
     }
 
     @Override
