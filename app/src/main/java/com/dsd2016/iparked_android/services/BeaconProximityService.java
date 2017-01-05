@@ -140,10 +140,31 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                 garageLocation.setLatitude(garage.getLatitude());
                 garageLocation.setLongitude(garage.getLongitude());
                 for (Floor f : garage.getFloors()) {
-                    IparkedApp.mFloorDbHelper.insert(f);
+                    IparkedApp.mFloorDbHelper.insertOrUpdate(f);
                     for (JsonBeacon b : f.getBeacons()) {
                         jsonBeacon.add(b);
                     }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error downloading garage beacons", Toast.LENGTH_SHORT).show();
+            }
+        });
+        RestCommunicator.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+    }
+
+    public void updateFloors(String garageUUID){
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url + garageUUID, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Gson gson = new Gson();
+                garage = gson.fromJson(response, Garage.class);
+                garageLocation.setLatitude(garage.getLatitude());
+                garageLocation.setLongitude(garage.getLongitude());
+                for (Floor f : garage.getFloors()) {
+                    IparkedApp.mFloorDbHelper.insertOrUpdate(f);
                 }
             }
         }, new Response.ErrorListener() {
@@ -166,13 +187,19 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         Location location;
         int floorId = -1;
 
-        if(garage != null && !collection.isEmpty()){
-            if(!garage.getUuid().equals(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString())){
-                getJsonData(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString());
+        for (org.altbeacon.beacon.Beacon tempBeacon : collection) {
+            if (garage != null) {
+                if (!garage.getUuid().equals(tempBeacon.getId1().toString())) {
+                    getJsonData(tempBeacon.getId1().toString());
+                    break;
+                }
+                else {
+                    updateFloors(tempBeacon.getId1().toString());
+                }
             }
-        }
-        else if (!collection.isEmpty()){
-            getJsonData(((org.altbeacon.beacon.Beacon) collection.toArray()[0]).getId1().toString());
+            else {
+                getJsonData(tempBeacon.getId1().toString());
+            }
         }
 
         for (org.altbeacon.beacon.Beacon visiblebeacon : collection){

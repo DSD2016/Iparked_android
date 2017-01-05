@@ -76,7 +76,7 @@ public class FloorDbHelper extends SQLiteOpenHelper {
         INDEX_LOCATION_LON = cursor.getColumnIndex(FloorDatabaseSchema.Floors.COLUMN_LOCATION_LON);
     }
 
-    public long insert (Floor floor) {
+    public long insertOrUpdate (Floor floor) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -92,7 +92,31 @@ public class FloorDbHelper extends SQLiteOpenHelper {
         values.put(FloorDatabaseSchema.Floors.COLUMN_LOCATION_LAT, floor.getLatitude());
         values.put(FloorDatabaseSchema.Floors.COLUMN_LOCATION_LON, floor.getLongitude());
 
-        return db.insert(FloorDatabaseSchema.Floors.TABLE_NAME, null, values);
+        if(floor.getId() != -1){
+            return db.replace(FloorDatabaseSchema.Floors.TABLE_NAME, null, values);
+        }
+        else {
+            return -1;
+        }
+
+//        if (db.insert(FloorDatabaseSchema.Floors.TABLE_NAME, null, values) < 1.0 && floor.getId() != -1) {
+//
+//            /** Which row to update, based on the title */
+//            String selection = FloorDatabaseSchema.Floors._ID + " LIKE ?";
+//            String[] selectionArgs = { int.toString(floor.getId()) };
+//
+//            int count = db.update(
+//                    FloorDatabaseSchema.Floors.TABLE_NAME,
+//                    values,
+//                    selection,
+//                    selectionArgs);
+//
+//            return count;
+//        }
+//        else {
+//            return -1;
+//        }
+//        return 1;
     }
 
     public Cursor read () {

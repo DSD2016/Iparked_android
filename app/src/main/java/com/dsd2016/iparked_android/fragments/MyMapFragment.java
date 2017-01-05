@@ -62,6 +62,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
     private Marker myLocationMarker;
     Bitmap floorMap;
     LatLng floorLocation;
+    boolean zoom = false;
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
@@ -242,6 +243,11 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                                     .image(BitmapDescriptorFactory.fromBitmap(floorMap))
                                     .position(parking, floor.getSizeX(), floor.getSizeY())
                                     .bearing((int) floor.getAngle());
+                            if ( overlays.containsKey(addr) ) {
+                                GroundOverlay overlay = overlays.get(addr);
+                                overlay.remove();
+                                overlays.remove(addr);
+                            }
                             overlays.put(addr, map.addGroundOverlay(parkingMap));
                         }
                     }, 0, 0, null,null,
@@ -276,9 +282,13 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                     LatLng latLng = new LatLng(latitude, longitude);
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(latLng);
+                    markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_dot));
                     markerOptions.title("You are here!");
                     myLocationMarker = map.addMarker(markerOptions);
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                    if (!zoom) {
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                        zoom = true;
+                    }
                 }
 
                 /** Check if beacon list is not initialized */
