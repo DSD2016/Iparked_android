@@ -9,9 +9,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
-/**
- * Created by Saeedek on 04-Dec-16.
- */
 
 public class RestCommunicator {
     private static RestCommunicator mInstance;
@@ -26,7 +23,7 @@ public class RestCommunicator {
         mImageLoader = new ImageLoader(mRequestQueue,
                 new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap>
-                            cache = new LruCache<String, Bitmap>(20);
+                            cache = new LruCache<>(20);
 
                     @Override
                     public Bitmap getBitmap(String url) {
@@ -53,16 +50,9 @@ public class RestCommunicator {
         }
         return mRequestQueue;
     }
+
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
     }
-
-    public ImageLoader getImageLoader() {
-        return mImageLoader;
-    }
-
-
-
-
 
 }

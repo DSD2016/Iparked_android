@@ -1,8 +1,5 @@
 package com.dsd2016.iparked_android.myClasses;
 
-/**
- * Created by ricca on 11/12/2016.
- */
 
 public class JsonBeacon {
 
@@ -33,6 +30,16 @@ public class JsonBeacon {
         this.bluetooth_address = bluetooth_address;
     }
 
+    public JsonBeacon() {
+        this.id = 0;
+        this.floor_id = 0;
+        this.name = null;
+        this.latitude = null;
+        this.longitude = null;
+        this.minor_number = 0;
+        this.bluetooth_address = null;
+    }
+
     public Double getLatitude() {
         return latitude;
     }
@@ -51,5 +58,18 @@ public class JsonBeacon {
 
     public int getMinor_number() {
         return minor_number;
+    }
+    public String getBluetooth_address(){ return bluetooth_address;}
+
+    public void setFloor_id(int floor_id) {
+        this.floor_id = floor_id;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

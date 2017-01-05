@@ -21,7 +21,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 
@@ -33,7 +32,7 @@ public class MyLocationProvider implements
     private Context context;
     private Activity activity;
     private OnGotLastLocation mOnGotLastLocation;
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     public MyLocationProvider(Context context, Fragment activity) {
         this.context=context;
@@ -47,10 +46,6 @@ public class MyLocationProvider implements
                     .build();
         }
         mGoogleApiClient.connect();
-    }
-
-    public void DisconnectApi() {
-        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -73,9 +68,10 @@ public class MyLocationProvider implements
             @Override
             public void onResult(LocationSettingsResult result) {
                 final Status status = result.getStatus();
-                final LocationSettingsStates state = result.getLocationSettingsStates();
                 switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        }
                         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                                 mGoogleApiClient);
                         mOnGotLastLocation.onGotLastLocation(mLastLocation);
@@ -112,6 +108,8 @@ public class MyLocationProvider implements
     }
 
     public void Continue() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if(mLastLocation==null){

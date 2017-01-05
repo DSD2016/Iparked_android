@@ -16,6 +16,7 @@ public final class BeaconDatabaseSchema {
         public static final String COLUMN_STORED = "stored";
         public static final String COLUMN_LOCATION_LAT = "latitude";
         public static final String COLUMN_LOCATION_LON = "longitude";
+        public static final String COLUMN_FLOOR_ID = "floorId";
     }
 
 }
