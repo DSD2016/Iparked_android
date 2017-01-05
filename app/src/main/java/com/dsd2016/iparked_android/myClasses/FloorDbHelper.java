@@ -98,25 +98,6 @@ public class FloorDbHelper extends SQLiteOpenHelper {
         else {
             return -1;
         }
-
-//        if (db.insert(FloorDatabaseSchema.Floors.TABLE_NAME, null, values) < 1.0 && floor.getId() != -1) {
-//
-//            /** Which row to update, based on the title */
-//            String selection = FloorDatabaseSchema.Floors._ID + " LIKE ?";
-//            String[] selectionArgs = { int.toString(floor.getId()) };
-//
-//            int count = db.update(
-//                    FloorDatabaseSchema.Floors.TABLE_NAME,
-//                    values,
-//                    selection,
-//                    selectionArgs);
-//
-//            return count;
-//        }
-//        else {
-//            return -1;
-//        }
-//        return 1;
     }
 
     public Cursor read () {
