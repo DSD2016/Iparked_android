@@ -165,38 +165,6 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                 .show();
     }
 
-    private void getGarage(){
-        JsonBeacon c= ((IparkedApp)getActivity().getApplication()).getLocationInGarage();
-        final Location g = ((IparkedApp)getActivity().getApplication()).getGarageLocation();
-        if(c != null){
-            String url ="http://iparked-api.sytes.net/api/floorplan/"+c.getFloor_id();
-            ImageRequest request = new ImageRequest(url,
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap bitmap) {
-                            floorMap = bitmap;
-                            LatLng fer_parking = new LatLng(g.getLatitude(),g.getLongitude());
-
-                            GroundOverlayOptions ferParkingMap = new GroundOverlayOptions()
-                                    .image(BitmapDescriptorFactory.fromBitmap(floorMap))
-                                    .position(fer_parking, 31, 62)
-                                    .bearing(87);
-                            map.addGroundOverlay(ferParkingMap);
-                        }
-                    }, 0, 0, null,null,
-                    new Response.ErrorListener() {
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getContext(), "Error downloading map image", Toast.LENGTH_SHORT).show();
-                            floorMap = null;
-                        }
-                    });
-            RestCommunicator.getInstance(getContext()).addToRequestQueue(request);
-        }
-        else{
-            map.clear();
-        }
-    }
-
     private void modifyMap(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(true);
@@ -204,10 +172,9 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
 
         myLocationProvider = new MyLocationProvider(getContext(), this);
         floorLocation = new LatLng(20, 20);
-        //getGarage();
 
-
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { }
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }
     }
 
     @Override

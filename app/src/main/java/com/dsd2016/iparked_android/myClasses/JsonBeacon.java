@@ -19,6 +19,7 @@ public class JsonBeacon {
     private Double longitude;
     private int minor_number;
     private String bluetooth_address;
+    private double distance;
 
     public JsonBeacon(int id, int floor_id, String name, Double latitude, Double longitude, int minor_number, String bluetooth_address) {
         this.id = id;
@@ -71,5 +72,13 @@ public class JsonBeacon {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 }

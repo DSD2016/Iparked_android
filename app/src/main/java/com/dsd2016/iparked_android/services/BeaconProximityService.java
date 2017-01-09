@@ -55,6 +55,8 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private Location mLastLocation;
     private double maxDistance = 1.5;
 
+    private int numberOfScans = 0;
+
     private String url ="http://iparked-api.sytes.net/api/uuid/";
     private ArrayList<JsonBeacon> jsonBeacon = new ArrayList<>();
     private Location garageLocation = new Location("");
@@ -109,6 +111,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         unregisterReceiver(getBeaconsOrLocation);
         beaconManager.unbind(this);
         mGoogleApiClient.disconnect();
+        Toast.makeText(getApplicationContext(), "Error service destroyed!", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -131,10 +134,10 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     }
 
     public void getJsonData(String garageUUID){
-        jsonBeacon.clear();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url + garageUUID, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                jsonBeacon.clear();
                 Gson gson = new Gson();
                 garage = gson.fromJson(response, Garage.class);
                 garageLocation.setLatitude(garage.getLatitude());
@@ -149,7 +152,6 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error downloading garage beacons", Toast.LENGTH_SHORT).show();
             }
         });
         RestCommunicator.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
@@ -170,7 +172,6 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error downloading garage beacons", Toast.LENGTH_SHORT).show();
             }
         });
         RestCommunicator.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
@@ -184,8 +185,11 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
         ArrayList<Beacon> personalBeaconList = IparkedApp.mDbHelper.getPersonalBeacons();
         double sumLong=0.0;
         double sumLat=0.0;
+        double distanceSum = 0.0;
         Location location;
         int floorId = -1;
+
+        numberOfScans++;
 
         for (org.altbeacon.beacon.Beacon tempBeacon : collection) {
             if (garage != null) {
@@ -193,8 +197,9 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
                     getJsonData(tempBeacon.getId1().toString());
                     break;
                 }
-                else {
+                else if (numberOfScans > 10) {
                     updateFloors(tempBeacon.getId1().toString());
+                    numberOfScans = 0;
                 }
             }
             else {
@@ -202,9 +207,11 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
             }
         }
 
-        for (org.altbeacon.beacon.Beacon visiblebeacon : collection){
+        for (org.altbeacon.beacon.Beacon visibleBeacon : collection){
             for(JsonBeacon b: jsonBeacon){
-                if(visiblebeacon.getBluetoothAddress().equals(b.getBluetooth_address())){
+                if(visibleBeacon.getBluetoothAddress().equals(b.getBluetooth_address())){
+                    b.setDistance(visibleBeacon.getDistance());
+                    distanceSum += visibleBeacon.getDistance();
                     visibleGarageBeacons.add(b);
                 }
             }
@@ -212,16 +219,17 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
 
         if(!visibleGarageBeacons.isEmpty()){
             floorId = visibleGarageBeacons.get(0).getFloor_id();
-            ((IparkedApp) getApplication()).getLocationInGarage().setFloor_id(floorId);
             for (JsonBeacon b : visibleGarageBeacons){
-                sumLong+=b.getLongitude();
-                sumLat+=b.getLatitude();
+                double p = 1.0;
+                if(visibleGarageBeacons.size() > 1){
+                    p = (distanceSum - b.getDistance()) / (distanceSum * (visibleGarageBeacons.size() - 1));
+                }
+                sumLong += b.getLongitude() * p;
+                sumLat += b.getLatitude() * p;
             }
-            double Long = sumLong/visibleGarageBeacons.size();
-            double Lat = sumLat/visibleGarageBeacons.size();
             location = new Location("");
-            location.setLongitude(Long);
-            location.setLatitude(Lat);
+            location.setLongitude(sumLong);
+            location.setLatitude(sumLat);
             mLastLocation = location;
         }
         else{
