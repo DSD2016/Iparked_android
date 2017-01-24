@@ -251,6 +251,7 @@ public class MyMapFragment extends Fragment implements OnMapReadyCallback, OnGot
                     markerOptions.position(latLng);
                     markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_dot));
                     markerOptions.title("You are here!");
+                    markerOptions.zIndex(1.0f);
                     myLocationMarker = map.addMarker(markerOptions);
                     if (!zoom) {
                         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));

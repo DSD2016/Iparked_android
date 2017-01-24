@@ -53,7 +53,7 @@ public class BeaconProximityService extends Service implements BeaconConsumer, R
     private BeaconManager beaconManager;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private double maxDistance = 1.5;
+    private double maxDistance = 2.0;
 
     private int numberOfScans = 0;
 
