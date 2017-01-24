@@ -18,9 +18,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by ricca on 11/12/2016.
- */
 
 public class Garage {
 
@@ -32,12 +29,12 @@ public class Garage {
     private int num_floors;
     private int garage_capacity;
     private String type;
-    private String uuid;
+    private String UUID;
     private String city;
     private String garage_timestamp;
     private ArrayList<Floor> floors;
 
-    public Garage(int id, int user_id, String name, Double longitude, Double latitude, int num_floors, int garage_capacity, String type, String uuid, String city, String garage_timestamp, ArrayList<Floor> floors) {
+    public Garage(int id, int user_id, String name, Double longitude, Double latitude, int num_floors, int garage_capacity, String type, String UUID, String city, String garage_timestamp, ArrayList<Floor> floors) {
         this.id = id;
         this.user_id = user_id;
         this.name = name;
@@ -46,7 +43,7 @@ public class Garage {
         this.num_floors = num_floors;
         this.garage_capacity = garage_capacity;
         this.type = type;
-        this.uuid = uuid;
+        this.UUID = UUID;
         this.city = city;
         this.garage_timestamp = garage_timestamp;
         this.floors = floors;
@@ -86,4 +83,14 @@ public class Garage {
     public ArrayList<Floor> getFloors() {
         return floors;
     }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public String getUuid() { return UUID; }
 }

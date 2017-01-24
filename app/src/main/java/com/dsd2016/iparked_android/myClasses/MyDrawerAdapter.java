@@ -13,15 +13,12 @@ import com.dsd2016.iparked_android.R;
 
 import java.util.List;
 
-/**
- * Created by Saeedek on 03-Dec-16.
- */
 
 public class MyDrawerAdapter extends ArrayAdapter<DrawerItem> {
 
-    Context context;
-    List<DrawerItem> drawerItemList;
-    int layoutResID;
+    private Context context;
+    private List<DrawerItem> drawerItemList;
+    private int layoutResID;
 
     public MyDrawerAdapter(Context context, int resource, List<DrawerItem> listItems) {
         super(context, resource, listItems);
@@ -51,7 +48,7 @@ public class MyDrawerAdapter extends ArrayAdapter<DrawerItem> {
 
         }
 
-        DrawerItem dItem = (DrawerItem) this.drawerItemList.get(position);
+        DrawerItem dItem = this.drawerItemList.get(position);
 
         drawerHolder.icon.setImageDrawable(view.getResources().getDrawable(
                 dItem.getImgResID()));
